@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tài khoản — PostureX</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0B0C0D; --surface: #1A1B1D; --border: #2C2D30;
+    --primary: #FF6F4F; --on-primary: #FFFFFF;
+    --text-primary: #F5F5F5; --text-secondary: #9A9A9E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text-primary);
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .card {
+    width: 100%; max-width: 420px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 20px; padding: 36px 32px;
+  }
+  h1 { font-family: "Bricolage Grotesque", sans-serif; font-size: 1.4rem; margin: 0 0 24px; }
+  .row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+  .row:last-of-type { border-bottom: none; }
+  .row .k { color: var(--text-secondary); }
+  .row .v { font-weight: 600; }
+  button {
+    width: 100%; margin-top: 26px; background: transparent; color: var(--text-secondary);
+    border: 1px solid var(--border); border-radius: 999px; padding: 12px;
+    font-family: inherit; font-size: 0.92rem; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); color: var(--text-primary); }
+  #loading, #guest { text-align: center; color: var(--text-secondary); }
+  #guest a { color: var(--primary); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div id="loading">Đang tải thông tin tài khoản...</div>
+
+  <div id="content" style="display:none;">
+    <h1>Tài khoản của bạn</h1>
+    <div class="row"><span class="k">Tên</span><span class="v" id="f-name">—</span></div>
+    <div class="row"><span class="k">Email</span><span class="v" id="f-email">—</span></div>
+    <div class="row"><span class="k">Số điện thoại</span><span class="v" id="f-phone">—</span></div>
+    <button id="logout-btn">Đăng xuất</button>
+  </div>
+
+  <div id="guest" style="display:none;">
+    Bạn chưa đăng nhập. <a href="login.html">Đăng nhập ngay</a>
+  </div>
+</div>
+
+<script>
+  (async () => {
+    const loading = document.getElementById("loading");
+    const content = document.getElementById("content");
+    const guest = document.getElementById("guest");
+
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "include" });
+      if (!res.ok) throw new Error("not logged in");
+      const data = await res.json();
+
+      document.getElementById("f-name").textContent = data.full_name || "(chưa cập nhật)";
+      document.getElementById("f-email").textContent = data.email;
+      document.getElementById("f-phone").textContent = data.phone_number || "(chưa cập nhật)";
+
+      loading.style.display = "none";
+      content.style.display = "block";
+    } catch {
+      loading.style.display = "none";
+      guest.style.display = "block";
+    }
+  })();
+
+  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    window.location.href = "login.html";
+  });
+</script>
+
+</body>
+</html>

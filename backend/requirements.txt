@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+httpx
+python-jose[cryptography]
+pydantic-settings
+pydantic[email]
+python-multipart
+sqlalchemy[asyncio]
+aiosqlite

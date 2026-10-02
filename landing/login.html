@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Đăng nhập — PostureX</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0B0C0D;
+    --surface: #1A1B1D;
+    --surface-elevated: #222325;
+    --border: #2C2D30;
+    --primary: #FF6F4F;
+    --primary-muted: #402920;
+    --on-primary: #FFFFFF;
+    --text-primary: #F5F5F5;
+    --text-secondary: #9A9A9E;
+    --text-tertiary: #5C5D60;
+    --danger: #FF6B6B;
+    --danger-muted: #3A1F1F;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  a { color: inherit; }
+  .card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 32px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  h1 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 0 0 6px;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    margin: 0 0 28px;
+  }
+  label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    margin-top: 16px;
+  }
+  input {
+    width: 100%;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: inherit;
+  }
+  input:focus { outline: none; border-color: var(--primary); }
+  button.submit {
+    width: 100%;
+    margin-top: 26px;
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    border-radius: 999px;
+    padding: 13px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  button.submit:hover { opacity: 0.92; }
+  button.submit:disabled { opacity: 0.55; cursor: default; }
+  .error {
+    display: none;
+    background: var(--danger-muted);
+    color: var(--danger);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.86rem;
+    margin-top: 18px;
+  }
+  .hint {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 0.82rem;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-top: 18px;
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+  }
+  .back-link:hover { color: var(--text-primary); }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 100 100" aria-hidden="true">
+      <line x1="27" y1="27" x2="73" y2="73" stroke="#FF6F4F" stroke-width="19" stroke-linecap="round"/>
+      <line x1="73" y1="27" x2="27" y2="73" stroke="#FF6F4F" stroke-opacity="0.45" stroke-width="19" stroke-linecap="round"/>
+    </svg>
+    PostureX
+  </div>
+
+  <h1>Đăng nhập</h1>
+  <p class="subtitle">Dùng đúng tài khoản bạn đã đăng ký trên app PostureX.</p>
+
+  <form id="login-form">
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" autocomplete="email" required />
+
+    <label for="password">Mật khẩu</label>
+    <input type="password" id="password" name="password" autocomplete="current-password" required />
+
+    <div class="error" id="error-box"></div>
+
+    <button type="submit" class="submit" id="submit-btn">Đăng nhập</button>
+  </form>
+
+  <p class="hint">Chưa có tài khoản? <a href="register.html" style="color:var(--primary); font-weight:600;">Đăng ký ngay</a></p>
+  <a href="index.html" class="back-link">← Quay lại trang chủ</a>
+</div>
+
+<script>
+  const form = document.getElementById("login-form");
+  const errorBox = document.getElementById("error-box");
+  const submitBtn = document.getElementById("submit-btn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorBox.style.display = "none";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Đang đăng nhập...";
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Đăng nhập thất bại.");
+      }
+
+      window.location.href = "account.html";
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.style.display = "block";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Đăng nhập";
+    }
+  });
+</script>
+
+</body>
+</html>
