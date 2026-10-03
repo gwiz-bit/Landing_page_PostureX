@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>PostureX — Huấn luyện viên AI cho tư thế tập luyện</title>
 <meta name="description" content="PostureX phân tích tư thế tập luyện theo thời gian thực bằng AI, sửa lỗi ngay khi bạn tập, và đồng hành cùng bạn qua từng buổi tập." />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="PostureX — Huấn luyện viên AI cho tư thế tập luyện" />
+<meta property="og:description" content="PostureX phân tích tư thế tập luyện theo thời gian thực bằng AI, sửa lỗi ngay khi bạn tập, và đồng hành cùng bạn qua từng buổi tập." />
+<meta property="og:image" content="assets/images/live-analysis.png" />
+<meta name="twitter:card" content="summary_large_image" />
+
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
@@ -24,7 +32,7 @@
   }
 
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scroll-padding-top: 88px; }
 
   body {
     margin: 0;
@@ -150,8 +158,45 @@
     color: var(--text-secondary);
   }
   nav.links a:hover { color: var(--text-primary); }
+
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    color: var(--text-primary);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+  }
+  .menu-toggle svg { pointer-events: none; }
+
   @media (max-width: 720px) {
-    nav.links { display: none; }
+    header.nav .wrap { position: relative; }
+    .menu-toggle { display: flex; }
+    nav.links {
+      display: none;
+      position: absolute;
+      top: calc(100% + 1px);
+      left: 24px;
+      right: 24px;
+      flex-direction: column;
+      gap: 0;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 16px 16px;
+      padding: 4px 0 12px;
+      box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
+    }
+    nav.links.open { display: flex; }
+    nav.links a {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    nav.links a:last-child { border-bottom: none; }
   }
   .nav-cta {
     position: relative;
@@ -606,7 +651,7 @@
       </svg>
       PostureX
     </div>
-    <nav class="links">
+    <nav class="links" id="nav-links">
       <a href="#how-it-works">Cách hoạt động</a>
       <a href="#features">Tính năng</a>
       <a href="#mission">Vì sao PostureX</a>
@@ -615,6 +660,11 @@
       <a href="login.html">Đăng nhập</a>
     </nav>
     <a href="#download" class="nav-cta">Tải app</a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Mở menu" aria-expanded="false" aria-controls="nav-links">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" id="menu-icon">
+        <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
   </div>
 </header>
 
@@ -629,7 +679,7 @@
         nhắc bạn sửa ngay trong lúc tập, như có một huấn luyện viên cá nhân
         luôn đứng cạnh.
       </p>
-      <form class="waitlist-form fade-in fade-in-4" data-waitlist-form data-source="hero">
+      <form class="waitlist-form fade-in fade-in-4" data-waitlist-form data-source="hero" novalidate>
         <input type="email" placeholder="Nhập email của bạn" required />
         <button type="submit">Đăng ký tải trước</button>
       </form>
@@ -638,7 +688,7 @@
     </div>
 
     <div class="hero-visual fade-in fade-in-3">
-      <img class="phone-shot" src="assets/images/live-analysis.png" alt="Màn hình phân tích tư thế real-time của PostureX, đang đếm rep và đưa ra góp ý kỹ thuật" />
+      <img class="phone-shot" src="assets/images/live-analysis.png" width="377" height="811" alt="Màn hình phân tích tư thế real-time của PostureX, đang đếm rep và đưa ra góp ý kỹ thuật" />
       <span class="phone-caption">● Đang phân tích trực tiếp bằng <b>AI</b></span>
     </div>
   </div>
@@ -740,22 +790,22 @@
     </div>
     <div class="tour-scroller reveal-stagger">
       <div class="tour-item">
-        <img src="assets/images/home-1.png" alt="Màn hình Trang chủ PostureX hiển thị điểm tư thế, mục tiêu tuần và lịch tập" />
+        <img src="assets/images/home-1.png" width="600" height="1296" loading="lazy" alt="Màn hình Trang chủ PostureX hiển thị điểm tư thế, mục tiêu tuần và lịch tập" />
         <div class="tour-label">Trang chủ</div>
         <div class="tour-desc">Theo dõi điểm tư thế, mục tiêu tuần và lịch tập ngay khi mở app.</div>
       </div>
       <div class="tour-item">
-        <img src="assets/images/exercises.png" alt="Màn hình thư viện bài tập PostureX với bộ lọc theo nhóm cơ" />
+        <img src="assets/images/exercises.png" width="600" height="1296" loading="lazy" alt="Màn hình thư viện bài tập PostureX với bộ lọc theo nhóm cơ" />
         <div class="tour-label">Thư viện bài tập</div>
         <div class="tour-desc">Tìm kiếm và lọc bài tập theo nhóm cơ, cấp độ, kèm video hướng dẫn.</div>
       </div>
       <div class="tour-item">
-        <img src="assets/images/workout.png" alt="Màn hình bắt đầu buổi tập của PostureX với các routine gợi ý" />
+        <img src="assets/images/workout.png" width="600" height="1296" loading="lazy" alt="Màn hình bắt đầu buổi tập của PostureX với các routine gợi ý" />
         <div class="tour-label">Bắt đầu buổi tập</div>
         <div class="tour-desc">Chọn routine có sẵn hoặc tự tạo buổi tập, phân tích trực tiếp hoặc tải video lên.</div>
       </div>
       <div class="tour-item">
-        <img src="assets/images/progress.png" alt="Màn hình theo dõi tiến bộ tổng thể của PostureX" />
+        <img src="assets/images/progress.png" width="600" height="1296" loading="lazy" alt="Màn hình theo dõi tiến bộ tổng thể của PostureX" />
         <div class="tour-label">Theo dõi tiến bộ</div>
         <div class="tour-desc">Xem điểm tư thế trung bình, xu hướng theo tuần và lịch sử buổi tập gần nhất.</div>
       </div>
@@ -787,7 +837,7 @@
       <span class="eyebrow">Sẵn sàng tập đúng cách?</span>
       <h2>Tải PostureX ngay khi ra mắt</h2>
       <p>Chúng tôi đang trong giai đoạn hoàn thiện cuối cùng trước khi phát hành trên Google Play và App Store. Để lại email để nhận thông báo ngay khi app ra mắt.</p>
-      <form class="waitlist-form" data-waitlist-form data-source="download">
+      <form class="waitlist-form" data-waitlist-form data-source="download" novalidate>
         <input type="email" placeholder="Nhập email của bạn" required />
         <button type="submit">Đăng ký tải trước</button>
       </form>
@@ -837,15 +887,45 @@
 </footer>
 
 <script>
+  // Menu hamburger trên mobile
+  const menuToggle = document.getElementById("menu-toggle");
+  const navLinksEl = document.getElementById("nav-links");
+  const menuIcon = document.getElementById("menu-icon");
+  const ICON_OPEN = '<path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+  const ICON_CLOSE = '<path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+
+  function setMenuOpen(open) {
+    navLinksEl.classList.toggle("open", open);
+    menuToggle.setAttribute("aria-expanded", String(open));
+    menuIcon.innerHTML = open ? ICON_CLOSE : ICON_OPEN;
+  }
+
+  menuToggle.addEventListener("click", () => {
+    setMenuOpen(!navLinksEl.classList.contains("open"));
+  });
+  navLinksEl.querySelectorAll("a").forEach((a) => {
+    a.addEventListener("click", () => setMenuOpen(false));
+  });
+
   // Đăng ký tải trước (waitlist) — mọi form [data-waitlist-form] trên trang
   document.querySelectorAll("[data-waitlist-form]").forEach((form) => {
     const msgEl = form.parentElement.querySelector("[data-waitlist-msg]");
     const input = form.querySelector("input[type='email']");
     const button = form.querySelector("button");
 
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (msgEl) { msgEl.textContent = ""; msgEl.className = "waitlist-msg"; }
+
+      const email = input.value.trim();
+      if (!email || !EMAIL_RE.test(email)) {
+        if (msgEl) { msgEl.textContent = "Vui lòng nhập một email hợp lệ."; msgEl.className = "waitlist-msg error"; }
+        input.focus();
+        return;
+      }
+
       button.disabled = true;
       button.textContent = "Đang gửi...";
 
@@ -853,7 +933,7 @@
         const res = await fetch("/api/waitlist", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: input.value.trim(), source: form.dataset.source || null }),
+          body: JSON.stringify({ email, source: form.dataset.source || null }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Có lỗi xảy ra, thử lại sau.");

@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Response
 from fastapi import Request as FastAPIRequest
 
 from app.core.config import settings
+from app.core.rate_limit import limiter
 from app.core.security import create_session_token, decode_session_token
 from app.schemas.auth import (
     LoginRequest,
@@ -48,7 +49,8 @@ def _set_session_cookie(response: Response, profile: dict) -> None:
 
 
 @router.post("/register", response_model=MessageResponse)
-async def register(data: RegisterRequest) -> MessageResponse:
+@limiter.limit("5/hour")
+async def register(request: FastAPIRequest, data: RegisterRequest) -> MessageResponse:
     try:
         await register_user(data.email, data.password, data.full_name)
     except PostureXAuthError as e:
@@ -59,7 +61,10 @@ async def register(data: RegisterRequest) -> MessageResponse:
 
 
 @router.post("/verify-otp", response_model=UserProfileOut)
-async def verify_otp(data: VerifyOtpRequest, response: Response) -> UserProfileOut:
+@limiter.limit("10/minute")
+async def verify_otp(
+    request: FastAPIRequest, data: VerifyOtpRequest, response: Response
+) -> UserProfileOut:
     try:
         profile = await verify_otp_and_fetch_profile(data.email, data.otp_code)
     except PostureXAuthError as e:
@@ -69,7 +74,8 @@ async def verify_otp(data: VerifyOtpRequest, response: Response) -> UserProfileO
 
 
 @router.post("/resend-otp", response_model=MessageResponse)
-async def resend_otp_endpoint(data: ResendOtpRequest) -> MessageResponse:
+@limiter.limit("5/hour")
+async def resend_otp_endpoint(request: FastAPIRequest, data: ResendOtpRequest) -> MessageResponse:
     try:
         message = await resend_otp_code(data.email)
     except PostureXAuthError as e:
@@ -78,7 +84,8 @@ async def resend_otp_endpoint(data: ResendOtpRequest) -> MessageResponse:
 
 
 @router.post("/login", response_model=UserProfileOut)
-async def login(data: LoginRequest, response: Response) -> UserProfileOut:
+@limiter.limit("10/minute;100/hour")
+async def login(request: FastAPIRequest, data: LoginRequest, response: Response) -> UserProfileOut:
     try:
         profile = await login_and_fetch_profile(data.email, data.password)
     except PostureXAuthError as e:
