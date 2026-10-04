@@ -28,6 +28,15 @@ from app.services.posturex_client import (
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
+_REGISTRATION_DISABLED_MESSAGE = (
+    "Đăng ký trên web đang tạm khoá. Vui lòng đăng ký trên app PostureX."
+)
+
+
+def _require_registration_enabled() -> None:
+    if not settings.REGISTRATION_ENABLED:
+        raise HTTPException(status_code=503, detail=_REGISTRATION_DISABLED_MESSAGE)
+
 
 def _set_session_cookie(response: Response, profile: dict) -> None:
     token = create_session_token(
@@ -51,6 +60,7 @@ def _set_session_cookie(response: Response, profile: dict) -> None:
 @router.post("/register", response_model=MessageResponse)
 @limiter.limit("5/hour")
 async def register(request: FastAPIRequest, data: RegisterRequest) -> MessageResponse:
+    _require_registration_enabled()
     try:
         await register_user(data.email, data.password, data.full_name)
     except PostureXAuthError as e:
@@ -65,6 +75,7 @@ async def register(request: FastAPIRequest, data: RegisterRequest) -> MessageRes
 async def verify_otp(
     request: FastAPIRequest, data: VerifyOtpRequest, response: Response
 ) -> UserProfileOut:
+    _require_registration_enabled()
     try:
         profile = await verify_otp_and_fetch_profile(data.email, data.otp_code)
     except PostureXAuthError as e:
@@ -76,6 +87,7 @@ async def verify_otp(
 @router.post("/resend-otp", response_model=MessageResponse)
 @limiter.limit("5/hour")
 async def resend_otp_endpoint(request: FastAPIRequest, data: ResendOtpRequest) -> MessageResponse:
+    _require_registration_enabled()
     try:
         message = await resend_otp_code(data.email)
     except PostureXAuthError as e:

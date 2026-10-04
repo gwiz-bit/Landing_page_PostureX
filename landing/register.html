@@ -8,19 +8,17 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #0B0C0D; --surface: #1A1B1D; --surface-elevated: #222325; --border: #2C2D30;
-    --primary: #FF6F4F; --primary-muted: #402920; --on-primary: #FFFFFF;
-    --text-primary: #F5F5F5; --text-secondary: #9A9A9E; --text-tertiary: #5C5D60;
-    --danger: #FF6B6B; --danger-muted: #3A1F1F;
-    --success: #4ADE80; --success-muted: #1C3324;
+    --bg: #0B0C0D; --surface: #1A1B1D; --border: #2C2D30;
+    --primary: #FF6F4F; --on-primary: #FFFFFF;
+    --text-primary: #F5F5F5; --text-secondary: #9A9A9E;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0; min-height: 100vh; background: var(--bg); color: var(--text-primary);
-    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   }
   a { color: inherit; text-decoration: none; }
   header.top-bar {
@@ -42,56 +40,16 @@
     display: flex; align-items: center; justify-content: center; padding: 24px;
   }
   .card {
-    width: 100%; max-width: 400px; background: var(--surface);
+    width: 100%; max-width: 420px; background: var(--surface);
     border: 1px solid var(--border); border-radius: 20px; padding: 40px 32px;
+    text-align: center;
   }
-  .step-progress {
-    display: flex; gap: 6px; margin-bottom: 24px;
+  h1 { font-family: "Bricolage Grotesque", sans-serif; font-size: 1.3rem; margin: 0 0 12px; }
+  p { color: var(--text-secondary); line-height: 1.6; margin: 0 0 24px; }
+  .cta {
+    display: inline-block; background: var(--primary); color: var(--on-primary);
+    padding: 12px 28px; border-radius: 999px; font-weight: 700; font-size: 0.92rem;
   }
-  .step-progress span {
-    flex: 1; height: 4px; border-radius: 999px; background: var(--border);
-    transition: background 0.2s ease;
-  }
-  .step-progress span.done { background: var(--primary); }
-  h1 { font-family: "Bricolage Grotesque", sans-serif; font-size: 1.5rem; font-weight: 800; text-align: center; margin: 0 0 6px; }
-  .subtitle { text-align: center; color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 28px; line-height: 1.6; }
-  label { display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px; margin-top: 16px; }
-  input {
-    width: 100%; background: var(--surface-elevated); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 14px; color: var(--text-primary);
-    font-size: 0.95rem; font-family: inherit; letter-spacing: normal;
-  }
-  input:focus { outline: none; border-color: var(--primary); }
-  #otp-code { text-align: center; letter-spacing: 0.4em; font-size: 1.2rem; font-family: "IBM Plex Mono", monospace; }
-  button.submit {
-    width: 100%; margin-top: 26px; background: var(--primary); color: var(--on-primary);
-    border: none; border-radius: 999px; padding: 13px; font-size: 0.95rem; font-weight: 700;
-    font-family: inherit; cursor: pointer; transition: opacity 0.15s ease;
-  }
-  button.submit:hover { opacity: 0.92; }
-  button.submit:disabled { opacity: 0.55; cursor: default; }
-  button.ghost {
-    width: 100%; margin-top: 10px; background: transparent; color: var(--text-secondary);
-    border: 1px solid var(--border); border-radius: 999px; padding: 11px;
-    font-family: inherit; font-size: 0.86rem; cursor: pointer;
-  }
-  button.ghost:hover { color: var(--text-primary); border-color: var(--primary); }
-  button.ghost:disabled { opacity: 0.5; cursor: default; }
-  .msg { display: none; border-radius: 10px; padding: 10px 14px; font-size: 0.86rem; margin-top: 18px; line-height: 1.5; }
-  .msg.error { background: var(--danger-muted); color: var(--danger); }
-  .msg.success { background: var(--success-muted); color: var(--success); }
-  .hint { text-align: center; color: var(--text-tertiary); font-size: 0.82rem; margin-top: 22px; line-height: 1.6; }
-  #step-otp { display: none; }
-  .pw-rules { font-size: 0.76rem; color: var(--text-tertiary); margin-top: 6px; line-height: 1.5; }
-  .pw-meter { display: flex; gap: 4px; margin-top: 8px; }
-  .pw-meter span { flex: 1; height: 3px; border-radius: 999px; background: var(--border); transition: background 0.2s ease; }
-  .pw-meter.weak span:nth-child(1) { background: var(--danger); }
-  .pw-meter.medium span:nth-child(1), .pw-meter.medium span:nth-child(2) { background: #FFB454; }
-  .pw-meter.strong span { background: var(--success); }
-  .pw-label { font-size: 0.76rem; margin-top: 4px; }
-  .pw-label.weak { color: var(--danger); }
-  .pw-label.medium { color: #FFB454; }
-  .pw-label.strong { color: var(--success); }
 </style>
 </head>
 <body>
@@ -109,188 +67,16 @@
 
 <main class="center-wrap">
 <div class="card">
-  <div class="step-progress">
-    <span class="done" id="progress-step1"></span>
-    <span id="progress-step2"></span>
-  </div>
-
-  <!-- Bước 1: đăng ký -->
-  <div id="step-register">
-    <h1>Tạo tài khoản</h1>
-    <p class="subtitle">Tài khoản này dùng chung được trên cả web và app PostureX.</p>
-
-    <form id="register-form">
-      <label for="full_name">Họ tên</label>
-      <input type="text" id="full_name" name="full_name" autocomplete="name" />
-
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" autocomplete="email" required />
-
-      <label for="password">Mật khẩu</label>
-      <input type="password" id="password" name="password" autocomplete="new-password" required minlength="6" />
-      <div class="pw-meter" id="pw-meter"><span></span><span></span><span></span></div>
-      <div class="pw-label" id="pw-label">Tối thiểu 6 ký tự.</div>
-
-      <div class="msg error" id="register-error"></div>
-
-      <button type="submit" class="submit" id="register-btn">Đăng ký</button>
-    </form>
-
-    <p class="hint">Đã có tài khoản? <a href="login.html" style="color:var(--primary); font-weight:600;">Đăng nhập</a></p>
-  </div>
-
-  <!-- Bước 2: nhập OTP -->
-  <div id="step-otp">
-    <h1>Xác thực email</h1>
-    <p class="subtitle">Nhập mã OTP vừa gửi tới <b id="otp-email-label"></b>.</p>
-
-    <form id="otp-form">
-      <label for="otp-code">Mã OTP</label>
-      <input type="text" id="otp-code" name="otp_code" inputmode="numeric" maxlength="6" required />
-
-      <div class="msg error" id="otp-error"></div>
-      <div class="msg success" id="otp-success"></div>
-
-      <button type="submit" class="submit" id="otp-btn">Xác thực</button>
-      <button type="button" class="ghost" id="resend-btn">Gửi lại mã OTP</button>
-    </form>
-  </div>
+  <h1>Đăng ký trên web đang tạm khoá</h1>
+  <p>
+    Đội ngũ PostureX đang hoàn thiện lại bước xác thực để đảm bảo an toàn
+    tài khoản. Trong lúc này, vui lòng đăng ký trực tiếp trên app PostureX
+    (Google Play / App Store) — tài khoản đó dùng đăng nhập được luôn trên
+    web khi tính năng này mở lại.
+  </p>
+  <a href="login.html" class="cta">Đăng nhập</a>
 </div>
 </main>
-
-<script>
-  const stepRegister = document.getElementById("step-register");
-  const stepOtp = document.getElementById("step-otp");
-  const registerForm = document.getElementById("register-form");
-  const registerBtn = document.getElementById("register-btn");
-  const registerError = document.getElementById("register-error");
-  const otpForm = document.getElementById("otp-form");
-  const otpBtn = document.getElementById("otp-btn");
-  const otpError = document.getElementById("otp-error");
-  const otpSuccess = document.getElementById("otp-success");
-  const resendBtn = document.getElementById("resend-btn");
-
-  let pendingEmail = "";
-
-  // Thước đo độ mạnh mật khẩu — chỉ mang tính gợi ý trực quan, KHÔNG thay
-  // thế validate thật (backend app mới là nơi quyết định mật khẩu hợp lệ).
-  const pwInput = document.getElementById("password");
-  const pwMeter = document.getElementById("pw-meter");
-  const pwLabel = document.getElementById("pw-label");
-  pwInput.addEventListener("input", () => {
-    const v = pwInput.value;
-    pwMeter.classList.remove("weak", "medium", "strong");
-    if (!v) {
-      pwLabel.textContent = "Tối thiểu 6 ký tự.";
-      pwLabel.className = "pw-label";
-      return;
-    }
-    let score = 0;
-    if (v.length >= 6) score++;
-    if (v.length >= 10) score++;
-    if (/[0-9]/.test(v) && /[a-zA-Z]/.test(v)) score++;
-    if (/[^a-zA-Z0-9]/.test(v)) score++;
-
-    if (score <= 1) {
-      pwMeter.classList.add("weak");
-      pwLabel.textContent = "Mật khẩu yếu";
-      pwLabel.className = "pw-label weak";
-    } else if (score <= 2) {
-      pwMeter.classList.add("medium");
-      pwLabel.textContent = "Mật khẩu trung bình";
-      pwLabel.className = "pw-label medium";
-    } else {
-      pwMeter.classList.add("strong");
-      pwLabel.textContent = "Mật khẩu mạnh";
-      pwLabel.className = "pw-label strong";
-    }
-  });
-
-  registerForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    registerError.style.display = "none";
-    registerBtn.disabled = true;
-    registerBtn.textContent = "Đang xử lý...";
-
-    const full_name = document.getElementById("full_name").value.trim() || null;
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-
-    try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, full_name }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Đăng ký thất bại.");
-
-      pendingEmail = email;
-      document.getElementById("otp-email-label").textContent = email;
-      stepRegister.style.display = "none";
-      stepOtp.style.display = "block";
-      document.getElementById("progress-step2").classList.add("done");
-    } catch (err) {
-      registerError.textContent = err.message;
-      registerError.style.display = "block";
-      registerBtn.disabled = false;
-      registerBtn.textContent = "Đăng ký";
-    }
-  });
-
-  otpForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    otpError.style.display = "none";
-    otpSuccess.style.display = "none";
-    otpBtn.disabled = true;
-    otpBtn.textContent = "Đang xác thực...";
-
-    const otp_code = document.getElementById("otp-code").value.trim();
-
-    try {
-      const res = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: pendingEmail, otp_code }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Mã OTP không đúng hoặc đã hết hạn.");
-
-      window.location.href = "account.html";
-    } catch (err) {
-      otpError.textContent = err.message;
-      otpError.style.display = "block";
-      otpBtn.disabled = false;
-      otpBtn.textContent = "Xác thực";
-    }
-  });
-
-  resendBtn.addEventListener("click", async () => {
-    resendBtn.disabled = true;
-    resendBtn.textContent = "Đang gửi...";
-    otpError.style.display = "none";
-
-    try {
-      const res = await fetch("/api/auth/resend-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: pendingEmail }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Gửi lại mã thất bại.");
-
-      otpSuccess.textContent = data.message;
-      otpSuccess.style.display = "block";
-    } catch (err) {
-      otpError.textContent = err.message;
-      otpError.style.display = "block";
-    } finally {
-      resendBtn.disabled = false;
-      resendBtn.textContent = "Gửi lại mã OTP";
-    }
-  });
-</script>
 
 </body>
 </html>
