@@ -17,7 +17,11 @@ ALGORITHM = "HS256"
 
 
 def create_session_token(
-    user_id: int, email: str, full_name: str | None, phone_number: str | None = None
+    user_id: int,
+    email: str,
+    full_name: str | None,
+    phone_number: str | None = None,
+    is_admin: bool = False,
 ) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.SESSION_EXPIRE_MINUTES)
     payload: dict[str, Any] = {
@@ -25,6 +29,7 @@ def create_session_token(
         "email": email,
         "full_name": full_name,
         "phone_number": phone_number,
+        "is_admin": is_admin,
         "exp": expire,
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=ALGORITHM)

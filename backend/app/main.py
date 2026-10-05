@@ -13,7 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.api.routes import auth, waitlist
+from app.api.routes import admin, auth, waitlist
 from app.core.config import settings
 from app.core.database import init_db
 from app.core.rate_limit import limiter, rate_limit_handler
@@ -24,6 +24,7 @@ app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
 app.include_router(auth.router)
 app.include_router(waitlist.router)
+app.include_router(admin.router)
 
 
 @app.on_event("startup")

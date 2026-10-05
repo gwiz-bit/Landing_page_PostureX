@@ -30,3 +30,4 @@ class UserProfileOut(BaseModel):
     email: str
     full_name: str | None
     phone_number: str | None = None
+    is_admin: bool = False

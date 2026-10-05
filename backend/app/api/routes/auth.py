@@ -44,6 +44,7 @@ def _set_session_cookie(response: Response, profile: dict) -> None:
         email=profile["email"],
         full_name=profile.get("full_name"),
         phone_number=profile.get("phone_number"),
+        is_admin=profile.get("is_admin", False),
     )
     response.set_cookie(
         key=settings.SESSION_COOKIE_NAME,
@@ -126,4 +127,24 @@ async def me(request: FastAPIRequest) -> UserProfileOut:
         email=payload["email"],
         full_name=payload.get("full_name"),
         phone_number=payload.get("phone_number"),
+        is_admin=payload.get("is_admin", False),
     )
+
+
+def require_admin(request: FastAPIRequest) -> dict:
+    """Dependency dùng cho mọi route chỉ admin được gọi (vd xem waitlist).
+
+    Đọc TRỰC TIẾP từ payload JWT đã có trong cookie — không gọi lại backend
+    app — vì `is_admin` đã được nhúng sẵn vào token lúc đăng nhập
+    (`_set_session_cookie`). Ném 401 nếu chưa đăng nhập/token hết hạn, 403
+    nếu đăng nhập nhưng không phải admin — hai mã khác nhau để trang admin
+    phân biệt được "cần đăng nhập lại" với "không có quyền"."""
+    token = request.cookies.get(settings.SESSION_COOKIE_NAME)
+    if not token:
+        raise HTTPException(status_code=401, detail="Chưa đăng nhập.")
+    payload = decode_session_token(token)
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Phiên đăng nhập đã hết hạn.")
+    if not payload.get("is_admin", False):
+        raise HTTPException(status_code=403, detail="Chỉ tài khoản admin được truy cập.")
+    return payload
