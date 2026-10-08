@@ -41,5 +41,5 @@ Cần `backend/.env` (copy từ `.env.example`, đặt `SECRET_KEY`). Đăng nh�
 ## Nhật ký công việc
 Định dạng: `YYYY-MM-DD — nội dung`. Mục mới thêm xuống cuối.
 
-- (trước 2026-10-08, do người dùng tự code; ngày chính xác không được ghi lại) — Backend FastAPI + landing tĩnh, đăng nhập qua backend app, tính năng waitlist (model, route, form trong `index.html`, trang admin `admin-waitlist.html` có xuất CSV), rate-limit. Git mới chỉ có commit "Initial commit"; phần lớn code chưa commit.
+- (trước 2026-10-08, do người dùng tự code; ngày chính xác không được ghi lại) — Backend FastAPI + landing tĩnh, đăng nhập qua backend app, tính năng waitlist (model, route, form trong `index.html`, trang admin `admin-waitlist.html` có xuất CSV), rate-limit. Xem `git log` để biết ngày chính xác (vd commit "Them trang admin xem danh sach email dang ky tai truoc (waitlist)", "thay email support").
 - 2026-10-08 — Claude rà soát code, xác nhận waitlist + trang admin đã có, hướng dẫn cách test; tạo file CLAUDE.md này. Chưa sửa code nào khác.
