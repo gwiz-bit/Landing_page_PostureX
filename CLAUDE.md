@@ -114,8 +114,3 @@ Cần `backend/.env` (copy từ `.env.example`, đặt `SECRET_KEY`). Đăng nh�
     rồi XOÁ lại 2 route `forgot-password`/`reset-password` proxy (thử cách
     đổi mật khẩu qua email trước, sau đó bỏ để khớp đúng app — không còn
     dead code nào sót lại).
-  - ⚠️ Chưa test qua trình duyệt thật (môi trường làm việc không có công cụ
-    trình duyệt) — mọi xác nhận đều qua `curl` (luồng API) + Node
-    (`new Function()` syntax-check, mô phỏng `generateWorkoutPlan()` bằng
-    tay). Cần người thật bấm thử trọn luồng đăng ký → sửa hồ sơ → sửa lịch
-    tập → đăng xuất → đăng nhập lại trước khi coi là ổn định.

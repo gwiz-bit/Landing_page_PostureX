@@ -58,6 +58,15 @@
     color: var(--text-secondary);
   }
   header.top-bar .home-link:hover { color: var(--text-primary); }
+  .lang-toggle {
+    display: flex; align-items: center; gap: 2px; background: var(--surface-elevated);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px; margin-left: 14px;
+  }
+  .lang-toggle button {
+    background: none; border: none; color: var(--text-secondary); font-family: inherit;
+    font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--primary); color: var(--on-primary); }
   main.center-wrap {
     min-height: calc(100vh - 73px);
     display: flex;
@@ -146,30 +155,37 @@
     <img src="assets/images/logo-icon.png" width="24" height="24" alt="" style="border-radius:6px;" />
     PostureX
   </a>
-  <a href="index.html" class="home-link">← Trang chủ</a>
+  <div style="display:flex; align-items:center;">
+    <a href="index.html" class="home-link" data-i18n="nav.backHome">← Trang chủ</a>
+    <div class="lang-toggle">
+      <button data-lang-toggle="vi" onclick="setLang('vi')">VI</button>
+      <button data-lang-toggle="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
 </header>
 
 <main class="center-wrap">
 <div class="card">
-  <h1>Đăng nhập</h1>
-  <p class="subtitle">Dùng đúng tài khoản bạn đã đăng ký trên app PostureX.</p>
+  <h1 data-i18n="login.title">Đăng nhập</h1>
+  <p class="subtitle" data-i18n="login.subtitle">Dùng đúng tài khoản bạn đã đăng ký trên app PostureX.</p>
 
   <form id="login-form">
-    <label for="email">Email</label>
+    <label for="email" data-i18n="login.emailLabel">Email</label>
     <input type="email" id="email" name="email" autocomplete="email" required />
 
-    <label for="password">Mật khẩu</label>
+    <label for="password" data-i18n="login.passwordLabel">Mật khẩu</label>
     <input type="password" id="password" name="password" autocomplete="current-password" required />
 
     <div class="error" id="error-box"></div>
 
-    <button type="submit" class="submit" id="submit-btn">Đăng nhập</button>
+    <button type="submit" class="submit" id="submit-btn" data-i18n="login.submit">Đăng nhập</button>
   </form>
 
-  <p class="hint">Chưa có tài khoản? <a href="register.html" style="color:var(--primary); font-weight:600;">Đăng ký ngay</a></p>
+  <p class="hint"><span data-i18n="login.noAccount">Chưa có tài khoản?</span> <a href="register.html" style="color:var(--primary); font-weight:600;" data-i18n="login.registerNow">Đăng ký ngay</a></p>
 </div>
 </main>
 
+<script src="assets/js/i18n.js"></script>
 <script>
   const form = document.getElementById("login-form");
   const errorBox = document.getElementById("error-box");
@@ -179,7 +195,7 @@
     e.preventDefault();
     errorBox.style.display = "none";
     submitBtn.disabled = true;
-    submitBtn.textContent = "Đang đăng nhập...";
+    submitBtn.textContent = t("login.submitting");
 
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
