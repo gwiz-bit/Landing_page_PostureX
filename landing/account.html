@@ -221,6 +221,13 @@
       <a href="home.html" class="submit">Xem lịch tập</a>
     </div>
 
+    <!-- Quản trị — chỉ hiện với tài khoản is_admin=True -->
+    <div class="card" id="admin-card" style="display:none;">
+      <h2>Quản trị</h2>
+      <p class="subtitle" style="margin-bottom:16px;">Xem danh sách email đã đăng ký tải trước.</p>
+      <a href="admin-waitlist.html" class="submit">Xem danh sách chờ</a>
+    </div>
+
     <button class="logout" id="logout-btn">Đăng xuất</button>
   </div>
 </main>
@@ -527,6 +534,7 @@
       currentEmail = me.email;
       document.getElementById("value-full-name").textContent = currentFullName || "(chưa cập nhật)";
       document.getElementById("value-email").textContent = me.email;
+      if (me.is_admin) document.getElementById("admin-card").style.display = "block";
 
       const profileRes = await fetch("/api/profile", { credentials: "include" });
       const profile = profileRes.ok ? await profileRes.json() : {};
