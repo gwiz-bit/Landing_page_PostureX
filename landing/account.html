@@ -44,26 +44,55 @@
   h1 { font-family: "Inter", sans-serif; font-size: 1.4rem; margin: 0 0 4px; }
   h2 { font-family: "Inter", sans-serif; font-size: 1.05rem; margin: 0 0 16px; }
   .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 24px; }
-  label { display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px; margin-top: 16px; }
-  label:first-of-type { margin-top: 0; }
+
+  /* Hàng xem — nhãn + giá trị + icon sửa */
+  .info-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .info-row:last-of-type { border-bottom: none; }
+  .info-text { display: flex; flex-direction: column; gap: 2px; }
+  .info-label { font-size: 0.78rem; color: var(--text-secondary); }
+  .info-value { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+  .info-value.muted { color: var(--text-tertiary); font-weight: 400; }
+  .icon-btn {
+    background: var(--surface-elevated); border: 1px solid var(--border); color: var(--text-secondary);
+    width: 34px; height: 34px; border-radius: 10px; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-family: inherit;
+  }
+  .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* Khung sửa inline — ẩn mặc định */
+  .edit-row { display: none; padding: 10px 0 16px; border-bottom: 1px solid var(--border); }
+  .edit-row:last-of-type { border-bottom: none; }
+  .edit-row.active { display: block; }
+  .edit-row label { display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px; }
   input, select {
     width: 100%; background: var(--surface-elevated); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 14px; color: var(--text-primary);
+    border-radius: 10px; padding: 11px 14px; color: var(--text-primary);
     font-size: 0.95rem; font-family: inherit;
   }
   input:focus, select:focus { outline: none; border-color: var(--primary); }
-  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip {
     background: var(--surface-elevated); border: 1px solid var(--border); color: var(--text-secondary);
     border-radius: 999px; padding: 8px 16px; font-size: 0.86rem; font-family: inherit;
     cursor: pointer; transition: all 0.12s ease;
   }
   .chip.selected { background: var(--primary-muted); border-color: var(--primary); color: var(--text-primary); }
+  .edit-actions { display: flex; gap: 10px; margin-top: 12px; }
+  .edit-actions button {
+    flex: 1; border-radius: 999px; padding: 10px; font-family: inherit; font-size: 0.88rem;
+    font-weight: 700; cursor: pointer; border: none;
+  }
+  .btn-save { background: var(--primary); color: var(--on-primary); }
+  .btn-save:disabled { opacity: 0.5; cursor: default; }
+  .btn-cancel { background: transparent; border: 1px solid var(--border) !important; color: var(--text-secondary); }
+
   button.submit, a.submit {
-    width: 100%; margin-top: 24px; background: var(--primary); color: var(--on-primary);
+    width: 100%; margin-top: 4px; background: var(--primary); color: var(--on-primary);
     border: none; border-radius: 999px; padding: 13px; font-size: 0.95rem; font-weight: 700;
-    font-family: inherit; cursor: pointer; box-sizing: border-box;
+    font-family: inherit; cursor: pointer; box-sizing: border-box; display: block; text-align: center;
   }
   button.submit:disabled { opacity: 0.5; cursor: default; }
   button.logout {
@@ -74,15 +103,19 @@
   button.logout:hover { border-color: var(--primary); color: var(--text-primary); }
   .error {
     display: none; background: var(--danger-muted); color: var(--danger);
-    border-radius: 10px; padding: 10px 14px; font-size: 0.86rem; margin-top: 18px;
+    border-radius: 10px; padding: 10px 14px; font-size: 0.86rem; margin-top: 12px;
   }
   .success {
     display: none; background: var(--success-muted); color: var(--success);
-    border-radius: 10px; padding: 10px 14px; font-size: 0.86rem; margin-top: 18px;
+    border-radius: 10px; padding: 10px 14px; font-size: 0.86rem; margin-top: 12px;
   }
   #loading, #guest { text-align: center; color: var(--text-secondary); }
   #guest a { color: var(--primary); font-weight: 600; }
-  .hint-small { color: var(--text-tertiary); font-size: 0.78rem; margin-top: 4px; }
+  .hint-small { color: var(--text-tertiary); font-size: 0.78rem; margin-top: 10px; line-height: 1.5; }
+  .add-field-link {
+    display: inline-block; margin-top: 8px; color: var(--primary); font-size: 0.86rem;
+    font-weight: 600; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0;
+  }
 </style>
 </head>
 <body>
@@ -106,66 +139,85 @@
     <h1>Hồ sơ của bạn</h1>
     <p class="subtitle">Xem và cập nhật thông tin cá nhân.</p>
 
-    <!-- Tài khoản: tên, email, mật khẩu -->
+    <!-- Thông tin tài khoản: họ tên / email / sđt -->
     <div class="card">
-      <h2>Tài khoản</h2>
-      <form id="form-account">
-        <label for="full-name">Họ tên</label>
-        <input type="text" id="full-name" />
-        <label for="email">Email</label>
-        <input type="email" id="email" disabled style="opacity:0.6;" />
-        <label for="new-password">Mật khẩu mới (để trống nếu không đổi)</label>
-        <input type="password" id="new-password" minlength="6" />
-        <div class="error" id="error-account"></div>
-        <div class="success" id="success-account"></div>
-        <button type="submit" class="submit" id="submit-account">Lưu thay đổi</button>
-      </form>
+      <h2>Thông tin tài khoản</h2>
+
+      <div class="info-row" id="view-full-name">
+        <div class="info-text">
+          <span class="info-label">Họ và tên</span>
+          <span class="info-value" id="value-full-name">—</span>
+        </div>
+        <button class="icon-btn" id="edit-full-name-btn" title="Sửa">✏️</button>
+      </div>
+      <div class="edit-row" id="edit-full-name">
+        <label for="input-full-name">Họ và tên</label>
+        <input type="text" id="input-full-name" />
+        <div class="error" id="error-full-name"></div>
+        <div class="edit-actions">
+          <button class="btn-cancel" id="cancel-full-name">Huỷ</button>
+          <button class="btn-save" id="save-full-name">Lưu</button>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-text">
+          <span class="info-label">Email</span>
+          <span class="info-value" id="value-email">—</span>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-text">
+          <span class="info-label">Số điện thoại</span>
+          <span class="info-value muted">(chưa cập nhật)</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Hồ sơ thể chất -->
+    <!-- Mật khẩu — đổi qua mã gửi email, không cần biết mật khẩu cũ -->
+    <div class="card">
+      <h2>Mật khẩu</h2>
+      <button class="submit" id="start-password-change-btn" style="margin-top:0;">Đổi mật khẩu</button>
+
+      <div id="password-step-sent" style="display:none;">
+        <p class="hint-small" id="password-sent-text"></p>
+        <label for="reset-token">Mã xác thực từ email</label>
+        <input type="text" id="reset-token" placeholder="Dán mã từ email vào đây" />
+        <label for="reset-new-password" style="margin-top:12px;">Mật khẩu mới</label>
+        <input type="password" id="reset-new-password" minlength="6" />
+        <label for="reset-confirm-password" style="margin-top:12px;">Nhập lại mật khẩu mới</label>
+        <input type="password" id="reset-confirm-password" minlength="6" />
+        <div class="error" id="error-password"></div>
+        <div class="success" id="success-password"></div>
+        <div class="edit-actions">
+          <button class="btn-cancel" id="cancel-password-change">Huỷ</button>
+          <button class="btn-save" id="confirm-password-change">Xác nhận đổi</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thông tin cơ thể — chỉ hiện mục đã điền, mỗi mục sửa riêng -->
     <div class="card">
       <h2>Thông tin cơ thể</h2>
-      <form id="form-profile">
-        <label>Giới tính</label>
-        <div class="chip-group" id="chips-gender"></div>
+      <div id="body-info-rows"></div>
+      <button class="add-field-link" id="add-field-btn" style="display:none;">+ Thêm thông tin còn thiếu</button>
 
-        <div class="row-2">
-          <div>
-            <label for="age">Tuổi</label>
-            <input type="number" id="age" min="1" max="120" />
-          </div>
-          <div>
-            <label for="weekly-goal">Buổi tập/tuần</label>
-            <input type="number" id="weekly-goal" min="1" max="7" />
-          </div>
+      <div class="edit-row" id="edit-missing-fields">
+        <div id="missing-fields-inputs"></div>
+        <div class="error" id="error-missing"></div>
+        <div class="edit-actions">
+          <button class="btn-cancel" id="cancel-missing">Huỷ</button>
+          <button class="btn-save" id="save-missing">Lưu</button>
         </div>
-        <div class="row-2">
-          <div>
-            <label for="height">Chiều cao (cm)</label>
-            <input type="number" id="height" min="140" max="220" />
-          </div>
-          <div>
-            <label for="weight">Cân nặng (kg)</label>
-            <input type="number" id="weight" min="35" max="180" />
-          </div>
-        </div>
-
-        <label>Trình độ tập luyện</label>
-        <div class="chip-group" id="chips-fitness-level"></div>
-
-        <p class="hint-small">Ngày tập/nhóm cơ trọng tâm/thiết bị/mục tiêu chỉ áp dụng cho lịch tập của phiên đăng ký — sửa ở đây không tạo lại lịch.</p>
-
-        <div class="error" id="error-profile"></div>
-        <div class="success" id="success-profile"></div>
-        <button type="submit" class="submit" id="submit-profile">Lưu thay đổi</button>
-      </form>
+      </div>
     </div>
 
     <!-- Lịch tập -->
     <div class="card">
       <h2>Lịch tập</h2>
       <p class="subtitle" style="margin-bottom:16px;">Xem lịch tập 4 tuần đã sinh cho bạn.</p>
-      <a href="home.html" class="submit" style="display:block; text-align:center; text-decoration:none;">Xem lịch tập</a>
+      <a href="home.html" class="submit">Xem lịch tập</a>
     </div>
 
     <button class="logout" id="logout-btn">Đăng xuất</button>
@@ -173,134 +225,171 @@
 </main>
 
 <script>
-  let currentFullName = "";
-  let selectedGender = null;
-  let selectedFitnessLevel = null;
+  // Định nghĩa 6 trường thông tin cơ thể — nguồn duy nhất cho cả phần xem
+  // lẫn phần sửa, tránh lặp code cho từng trường.
+  const BODY_FIELDS = [
+    { key: "gender", label: "Giới tính", type: "chip", options: ["Male", "Female", "Other"] },
+    { key: "age", label: "Tuổi", type: "number", min: 1, max: 120 },
+    { key: "height_cm", label: "Chiều cao (cm)", type: "number", min: 140, max: 220 },
+    { key: "weight_kg", label: "Cân nặng (kg)", type: "number", min: 35, max: 180 },
+    { key: "fitness_level", label: "Trình độ tập luyện", type: "chip", options: ["Beginner", "Intermediate", "Advanced"] },
+    { key: "weekly_goal", label: "Buổi tập/tuần", type: "number", min: 1, max: 7 },
+  ];
 
-  function renderSingleSelectChips(containerId, options, selected, onSelect) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = "";
-    options.forEach((opt) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "chip" + (opt === selected ? " selected" : "");
-      btn.textContent = opt;
-      btn.addEventListener("click", () => {
-        [...container.children].forEach((c) => c.classList.remove("selected"));
-        btn.classList.add("selected");
-        onSelect(opt);
-      });
-      container.appendChild(btn);
-    });
+  let currentFullName = "";
+  let currentEmail = "";
+  let currentProfile = {};
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
-  (async () => {
-    const loading = document.getElementById("loading");
-    const guest = document.getElementById("guest");
-    const content = document.getElementById("content");
+  // --- Render phần "Thông tin cơ thể": chỉ hiện trường đã có giá trị ---
+  function renderBodyInfo(profile) {
+    currentProfile = profile;
+    const container = document.getElementById("body-info-rows");
+    container.innerHTML = "";
+    const missing = [];
 
-    try {
-      const meRes = await fetch("/api/auth/me", { credentials: "include" });
-      if (!meRes.ok) throw new Error("not logged in");
-      const me = await meRes.json();
-      currentFullName = me.full_name || "";
-      document.getElementById("full-name").value = currentFullName;
-      document.getElementById("email").value = me.email;
+    for (const field of BODY_FIELDS) {
+      const value = profile[field.key];
+      if (value == null) {
+        missing.push(field);
+        continue;
+      }
+      const viewId = `view-${field.key}`;
+      const editId = `edit-${field.key}`;
+      const displayValue = field.key === "height_cm" ? `${value} cm` : field.key === "weight_kg" ? `${value} kg` : value;
 
-      const profileRes = await fetch("/api/profile", { credentials: "include" });
-      const profile = profileRes.ok ? await profileRes.json() : {};
+      const row = document.createElement("div");
+      row.innerHTML = `
+        <div class="info-row" id="${viewId}">
+          <div class="info-text">
+            <span class="info-label">${field.label}</span>
+            <span class="info-value">${escapeHtml(displayValue)}</span>
+          </div>
+          <button class="icon-btn" data-edit-field="${field.key}" title="Sửa">✏️</button>
+        </div>
+        <div class="edit-row" id="${editId}">
+          <label>${field.label}</label>
+          <div id="${editId}-input"></div>
+          <div class="error" id="error-${field.key}"></div>
+          <div class="edit-actions">
+            <button class="btn-cancel" data-cancel-field="${field.key}">Huỷ</button>
+            <button class="btn-save" data-save-field="${field.key}">Lưu</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(row);
 
-      selectedGender = profile.gender || null;
-      selectedFitnessLevel = profile.fitness_level || null;
-      renderSingleSelectChips("chips-gender", ["Male", "Female", "Other"], selectedGender, (v) => (selectedGender = v));
-      renderSingleSelectChips(
-        "chips-fitness-level",
-        ["Beginner", "Intermediate", "Advanced"],
-        selectedFitnessLevel,
-        (v) => (selectedFitnessLevel = v)
-      );
+      renderFieldInput(`${editId}-input`, field, value);
 
-      if (profile.age != null) document.getElementById("age").value = profile.age;
-      if (profile.weekly_goal != null) document.getElementById("weekly-goal").value = profile.weekly_goal;
-      if (profile.height_cm != null) document.getElementById("height").value = profile.height_cm;
-      if (profile.weight_kg != null) document.getElementById("weight").value = profile.weight_kg;
-
-      loading.style.display = "none";
-      content.style.display = "block";
-    } catch {
-      loading.style.display = "none";
-      guest.style.display = "block";
+      row.querySelector(`[data-edit-field="${field.key}"]`).addEventListener("click", () => toggleFieldEdit(field.key, true));
+      row.querySelector(`[data-cancel-field="${field.key}"]`).addEventListener("click", () => toggleFieldEdit(field.key, false));
+      row.querySelector(`[data-save-field="${field.key}"]`).addEventListener("click", () => saveField(field));
     }
-  })();
 
-  // --- Form tài khoản (tên/mật khẩu) — chỉ gửi phần đã đổi ---
-  document.getElementById("form-account").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const errorBox = document.getElementById("error-account");
-    const successBox = document.getElementById("success-account");
+    const addBtn = document.getElementById("add-field-btn");
+    if (missing.length > 0) {
+      addBtn.style.display = "inline-block";
+      addBtn.onclick = () => renderMissingFieldsForm(missing);
+    } else {
+      addBtn.style.display = "none";
+    }
+  }
+
+  function renderFieldInput(containerId, field, currentValue) {
+    const el = document.getElementById(containerId);
+    if (field.type === "chip") {
+      el.innerHTML = `<div class="chip-group" data-chip-group="${field.key}"></div>`;
+      const group = el.querySelector(".chip-group");
+      field.options.forEach((opt) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip" + (opt === currentValue ? " selected" : "");
+        btn.textContent = opt;
+        btn.dataset.value = opt;
+        btn.addEventListener("click", () => {
+          [...group.children].forEach((c) => c.classList.remove("selected"));
+          btn.classList.add("selected");
+        });
+        group.appendChild(btn);
+      });
+    } else {
+      el.innerHTML = `<input type="number" min="${field.min}" max="${field.max}" value="${currentValue ?? ""}" data-field-input="${field.key}" />`;
+    }
+  }
+
+  function toggleFieldEdit(key, show) {
+    document.getElementById(`view-${key}`).style.display = show ? "none" : "flex";
+    document.getElementById(`edit-${key}`).classList.toggle("active", show);
+  }
+
+  function readFieldValue(field) {
+    if (field.type === "chip") {
+      const selected = document.querySelector(`[data-chip-group="${field.key}"] .chip.selected`);
+      return selected ? selected.dataset.value : null;
+    }
+    const input = document.querySelector(`[data-field-input="${field.key}"]`);
+    return input.value ? Number(input.value) : null;
+  }
+
+  async function saveField(field) {
+    const errorBox = document.getElementById(`error-${field.key}`);
     errorBox.style.display = "none";
-    successBox.style.display = "none";
-
-    const fullName = document.getElementById("full-name").value.trim();
-    const newPassword = document.getElementById("new-password").value;
-
-    const payload = {};
-    if (fullName !== currentFullName) payload.full_name = fullName;
-    if (newPassword) payload.password = newPassword;
-
-    if (Object.keys(payload).length === 0) {
-      successBox.textContent = "Không có thay đổi nào để lưu.";
-      successBox.style.display = "block";
+    const value = readFieldValue(field);
+    if (value == null) {
+      errorBox.textContent = "Vui lòng nhập giá trị.";
+      errorBox.style.display = "block";
       return;
     }
-
-    const btn = document.getElementById("submit-account");
-    btn.disabled = true;
     try {
-      const res = await fetch("/api/account", {
-        method: "PATCH",
+      const res = await fetch("/api/profile", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ [field.key]: value }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Không lưu được.");
-
-      currentFullName = data.full_name || fullName;
-      document.getElementById("new-password").value = "";
-      successBox.textContent = "Đã lưu thay đổi.";
-      successBox.style.display = "block";
+      renderBodyInfo(data);
     } catch (err) {
       errorBox.textContent = err.message;
       errorBox.style.display = "block";
-    } finally {
-      btn.disabled = false;
     }
+  }
+
+  // --- "+ Thêm thông tin còn thiếu" — gom các trường chưa có vào 1 form ---
+  function renderMissingFieldsForm(missingFields) {
+    const panel = document.getElementById("edit-missing-fields");
+    const container = document.getElementById("missing-fields-inputs");
+    container.innerHTML = "";
+    missingFields.forEach((field) => {
+      const wrap = document.createElement("div");
+      wrap.style.marginBottom = "14px";
+      wrap.innerHTML = `<label>${field.label}</label><div id="missing-input-${field.key}"></div>`;
+      container.appendChild(wrap);
+      renderFieldInput(`missing-input-${field.key}`, field, null);
+    });
+    panel.classList.add("active");
+    panel.dataset.fields = JSON.stringify(missingFields.map((f) => f.key));
+  }
+
+  document.getElementById("cancel-missing").addEventListener("click", () => {
+    document.getElementById("edit-missing-fields").classList.remove("active");
   });
 
-  // --- Form hồ sơ thể chất — chỉ gửi phần đã điền ---
-  document.getElementById("form-profile").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const errorBox = document.getElementById("error-profile");
-    const successBox = document.getElementById("success-profile");
-    errorBox.style.display = "none";
-    successBox.style.display = "none";
-
+  document.getElementById("save-missing").addEventListener("click", async () => {
+    const panel = document.getElementById("edit-missing-fields");
+    const keys = JSON.parse(panel.dataset.fields || "[]");
     const payload = {};
-    const age = document.getElementById("age").value;
-    const weeklyGoal = document.getElementById("weekly-goal").value;
-    const height = document.getElementById("height").value;
-    const weight = document.getElementById("weight").value;
-
-    if (age) payload.age = Number(age);
-    if (weeklyGoal) payload.weekly_goal = Number(weeklyGoal);
-    if (height) payload.height_cm = Number(height);
-    if (weight) payload.weight_kg = Number(weight);
-    if (selectedGender) payload.gender = selectedGender;
-    if (selectedFitnessLevel) payload.fitness_level = selectedFitnessLevel;
-
-    const btn = document.getElementById("submit-profile");
-    btn.disabled = true;
+    for (const key of keys) {
+      const field = BODY_FIELDS.find((f) => f.key === key);
+      const value = readFieldValue(field);
+      if (value != null) payload[key] = value;
+    }
+    const errorBox = document.getElementById("error-missing");
+    errorBox.style.display = "none";
     try {
       const res = await fetch("/api/profile", {
         method: "PUT",
@@ -310,9 +399,117 @@
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Không lưu được.");
+      panel.classList.remove("active");
+      renderBodyInfo(data);
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.style.display = "block";
+    }
+  });
 
-      successBox.textContent = "Đã lưu thay đổi.";
+  // --- Họ và tên ---
+  document.getElementById("edit-full-name-btn").addEventListener("click", () => {
+    document.getElementById("input-full-name").value = currentFullName;
+    document.getElementById("view-full-name").style.display = "none";
+    document.getElementById("edit-full-name").classList.add("active");
+  });
+  document.getElementById("cancel-full-name").addEventListener("click", () => {
+    document.getElementById("view-full-name").style.display = "flex";
+    document.getElementById("edit-full-name").classList.remove("active");
+  });
+  document.getElementById("save-full-name").addEventListener("click", async () => {
+    const errorBox = document.getElementById("error-full-name");
+    errorBox.style.display = "none";
+    const newName = document.getElementById("input-full-name").value.trim();
+    if (!newName) {
+      errorBox.textContent = "Họ tên không được để trống.";
+      errorBox.style.display = "block";
+      return;
+    }
+    try {
+      const res = await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ full_name: newName }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Không lưu được.");
+      currentFullName = data.full_name || newName;
+      document.getElementById("value-full-name").textContent = currentFullName;
+      document.getElementById("view-full-name").style.display = "flex";
+      document.getElementById("edit-full-name").classList.remove("active");
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.style.display = "block";
+    }
+  });
+
+  // --- Đổi mật khẩu qua mã gửi email (không cần trang riêng — cùng 1 thẻ,
+  // 2 bước, giống hệt cách register.html xử lý OTP) ---
+  document.getElementById("start-password-change-btn").addEventListener("click", async () => {
+    const btn = document.getElementById("start-password-change-btn");
+    btn.disabled = true;
+    try {
+      await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: currentEmail }),
+      });
+      document.getElementById("password-sent-text").textContent =
+        `Đã gửi mã xác thực tới ${currentEmail}. Dán mã vào ô bên dưới cùng mật khẩu mới.`;
+      btn.style.display = "none";
+      document.getElementById("password-step-sent").style.display = "block";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById("cancel-password-change").addEventListener("click", () => {
+    document.getElementById("password-step-sent").style.display = "none";
+    document.getElementById("start-password-change-btn").style.display = "block";
+    document.getElementById("reset-token").value = "";
+    document.getElementById("reset-new-password").value = "";
+    document.getElementById("reset-confirm-password").value = "";
+  });
+
+  document.getElementById("confirm-password-change").addEventListener("click", async () => {
+    const errorBox = document.getElementById("error-password");
+    const successBox = document.getElementById("success-password");
+    errorBox.style.display = "none";
+    successBox.style.display = "none";
+
+    const token = document.getElementById("reset-token").value.trim();
+    const newPassword = document.getElementById("reset-new-password").value;
+    const confirmPassword = document.getElementById("reset-confirm-password").value;
+
+    if (!token) {
+      errorBox.textContent = "Vui lòng nhập mã xác thực từ email.";
+      errorBox.style.display = "block";
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      errorBox.textContent = "Mật khẩu nhập lại không khớp.";
+      errorBox.style.display = "block";
+      return;
+    }
+
+    const btn = document.getElementById("confirm-password-change");
+    btn.disabled = true;
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, new_password: newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Không đổi được mật khẩu.");
+
+      successBox.textContent = "Đã đổi mật khẩu thành công.";
       successBox.style.display = "block";
+      document.getElementById("reset-token").value = "";
+      document.getElementById("reset-new-password").value = "";
+      document.getElementById("reset-confirm-password").value = "";
     } catch (err) {
       errorBox.textContent = err.message;
       errorBox.style.display = "block";
@@ -320,6 +517,34 @@
       btn.disabled = false;
     }
   });
+
+  // --- Tải dữ liệu ban đầu ---
+  (async () => {
+    const loading = document.getElementById("loading");
+    const guest = document.getElementById("guest");
+    const content = document.getElementById("content");
+
+    try {
+      const meRes = await fetch("/api/auth/me", { credentials: "include" });
+      if (!meRes.ok) throw new Error("not logged in");
+      const me = await meRes.json();
+
+      currentFullName = me.full_name || "";
+      currentEmail = me.email;
+      document.getElementById("value-full-name").textContent = currentFullName || "(chưa cập nhật)";
+      document.getElementById("value-email").textContent = me.email;
+
+      const profileRes = await fetch("/api/profile", { credentials: "include" });
+      const profile = profileRes.ok ? await profileRes.json() : {};
+      renderBodyInfo(profile);
+
+      loading.style.display = "none";
+      content.style.display = "block";
+    } catch {
+      loading.style.display = "none";
+      guest.style.display = "block";
+    }
+  })();
 
   document.getElementById("logout-btn")?.addEventListener("click", async () => {
     // Cố tình KHÔNG xoá "posturex_plan" — xem ghi chú tương tự trong home.html.

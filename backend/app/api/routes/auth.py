@@ -11,17 +11,21 @@ from app.core.config import settings
 from app.core.rate_limit import limiter
 from app.core.security import create_session_token, decode_session_token
 from app.schemas.auth import (
+    ForgotPasswordRequest,
     LoginRequest,
     MessageResponse,
     RegisterRequest,
     ResendOtpRequest,
+    ResetPasswordRequest,
     UserProfileOut,
     VerifyOtpRequest,
 )
 from app.services.posturex_client import (
     PostureXAuthError,
+    confirm_password_reset,
     login_and_fetch_profile,
     register as register_user,
+    request_password_reset,
     resend_otp as resend_otp_code,
     verify_otp_and_fetch_profile,
 )
@@ -107,6 +111,27 @@ async def login(request: FastAPIRequest, data: LoginRequest, response: Response)
 
     _set_session_cookie(response, profile, access_token)
     return UserProfileOut(**profile)
+
+
+@router.post("/forgot-password", response_model=MessageResponse)
+@limiter.limit("5/hour")
+async def forgot_password(request: FastAPIRequest, data: ForgotPasswordRequest) -> MessageResponse:
+    """Dùng cho nút "Đổi mật khẩu" ở trang Hồ sơ — gửi mã qua email, không
+    cần biết mật khẩu cũ. Backend app tự trả thông báo chung chung kể cả
+    email không tồn tại (chống dò email), nên không cần kiểm tra gì thêm
+    ở đây."""
+    message = await request_password_reset(data.email)
+    return MessageResponse(message=message)
+
+
+@router.post("/reset-password", response_model=MessageResponse)
+@limiter.limit("10/hour")
+async def reset_password(request: FastAPIRequest, data: ResetPasswordRequest) -> MessageResponse:
+    try:
+        message = await confirm_password_reset(data.token, data.new_password)
+    except PostureXAuthError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    return MessageResponse(message=message)
 
 
 @router.post("/logout")
