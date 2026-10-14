@@ -174,19 +174,28 @@
           <span class="info-value muted">(chưa cập nhật)</span>
         </div>
       </div>
-    </div>
 
-    <!-- Mật khẩu — giống app: chỉ cần nhập mật khẩu mới 2 lần, không cần
-         mật khẩu cũ hay email xác thực, vì đã đăng nhập hợp lệ rồi. -->
-    <div class="card">
-      <h2>Mật khẩu</h2>
-      <label for="new-password">Mật khẩu mới</label>
-      <input type="password" id="new-password" minlength="6" placeholder="Để trống nếu không đổi" />
-      <label for="confirm-password">Nhập lại mật khẩu mới</label>
-      <input type="password" id="confirm-password" minlength="6" />
-      <div class="error" id="error-password"></div>
-      <div class="success" id="success-password"></div>
-      <button class="submit" id="save-password-btn">Đổi mật khẩu</button>
+      <!-- Mật khẩu — giống app: chỉ cần nhập mật khẩu mới 2 lần, không cần
+           mật khẩu cũ hay email xác thực, vì đã đăng nhập hợp lệ rồi. -->
+      <div class="info-row" id="view-password">
+        <div class="info-text">
+          <span class="info-label">Mật khẩu</span>
+          <span class="info-value">••••••••</span>
+        </div>
+        <button class="icon-btn" id="edit-password-btn" title="Đổi mật khẩu">✏️</button>
+      </div>
+      <div class="edit-row" id="edit-password">
+        <label for="new-password">Mật khẩu mới</label>
+        <input type="password" id="new-password" minlength="6" />
+        <label for="confirm-password">Nhập lại mật khẩu mới</label>
+        <input type="password" id="confirm-password" minlength="6" />
+        <div class="error" id="error-password"></div>
+        <div class="success" id="success-password"></div>
+        <div class="edit-actions">
+          <button class="btn-cancel" id="cancel-password">Huỷ</button>
+          <button class="btn-save" id="save-password-btn">Lưu</button>
+        </div>
+      </div>
     </div>
 
     <!-- Thông tin cơ thể — chỉ hiện mục đã điền, mỗi mục sửa riêng -->
@@ -437,8 +446,28 @@
     }
   });
 
-  // --- Đổi mật khẩu — giống app: chỉ cần nhập mật khẩu mới 2 lần, gọi
-  // thẳng PATCH /api/account (đang đăng nhập hợp lệ coi như đủ xác thực). ---
+  // --- Đổi mật khẩu — cùng mẫu view/sửa như các mục khác (icon ✏️ bật
+  // edit-row), chỉ cần nhập mật khẩu mới 2 lần, gọi thẳng PATCH /api/account
+  // (đang đăng nhập hợp lệ coi như đủ xác thực, giống app). ---
+  function resetPasswordEdit() {
+    document.getElementById("new-password").value = "";
+    document.getElementById("confirm-password").value = "";
+    document.getElementById("error-password").style.display = "none";
+    document.getElementById("success-password").style.display = "none";
+  }
+
+  document.getElementById("edit-password-btn").addEventListener("click", () => {
+    resetPasswordEdit();
+    document.getElementById("view-password").style.display = "none";
+    document.getElementById("edit-password").classList.add("active");
+  });
+
+  document.getElementById("cancel-password").addEventListener("click", () => {
+    resetPasswordEdit();
+    document.getElementById("view-password").style.display = "flex";
+    document.getElementById("edit-password").classList.remove("active");
+  });
+
   document.getElementById("save-password-btn").addEventListener("click", async () => {
     const errorBox = document.getElementById("error-password");
     const successBox = document.getElementById("success-password");
@@ -471,10 +500,10 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Không đổi được mật khẩu.");
 
-      successBox.textContent = "Đã đổi mật khẩu thành công.";
-      successBox.style.display = "block";
       document.getElementById("new-password").value = "";
       document.getElementById("confirm-password").value = "";
+      document.getElementById("view-password").style.display = "flex";
+      document.getElementById("edit-password").classList.remove("active");
     } catch (err) {
       errorBox.textContent = err.message;
       errorBox.style.display = "block";
