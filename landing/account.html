@@ -36,6 +36,15 @@
   }
   header.top-bar .home-link { font-size: 0.86rem; color: var(--text-secondary); }
   header.top-bar .home-link:hover { color: var(--text-primary); }
+  .lang-toggle {
+    display: flex; align-items: center; gap: 2px; background: var(--surface-elevated);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px; margin-left: 14px;
+  }
+  .lang-toggle button {
+    background: none; border: none; color: var(--text-secondary); font-family: inherit;
+    font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--primary); color: var(--on-primary); }
   main.wrap { max-width: 560px; margin: 0 auto; padding: 40px 24px 80px; }
   .card {
     background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
@@ -126,52 +135,58 @@
     <img src="assets/images/logo-icon.png" width="24" height="24" alt="" style="border-radius:6px;" />
     PostureX
   </a>
-  <a href="index.html" class="home-link">← Trang chủ</a>
+  <div style="display:flex; align-items:center;">
+    <a href="index.html" class="home-link" data-i18n="nav.backHome">← Trang chủ</a>
+    <div class="lang-toggle">
+      <button type="button" data-lang-toggle="vi" onclick="setLang('vi')">VI</button>
+      <button type="button" data-lang-toggle="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
 </header>
 
 <main class="wrap">
-  <div id="loading">Đang tải hồ sơ...</div>
+  <div id="loading" data-i18n="account.loading">Đang tải hồ sơ...</div>
 
   <div id="guest" style="display:none;">
-    Bạn chưa đăng nhập. <a href="login.html">Đăng nhập ngay</a>
+    <span data-i18n="account.notLoggedIn">Bạn chưa đăng nhập.</span> <a href="login.html" data-i18n="account.loginNow">Đăng nhập ngay</a>
   </div>
 
   <div id="content" style="display:none;">
-    <h1>Hồ sơ của bạn</h1>
-    <p class="subtitle">Xem và cập nhật thông tin cá nhân.</p>
+    <h1 data-i18n="account.title">Hồ sơ của bạn</h1>
+    <p class="subtitle" data-i18n="account.subtitle">Xem và cập nhật thông tin cá nhân.</p>
 
     <!-- Thông tin tài khoản: họ tên / email / sđt -->
     <div class="card">
-      <h2>Thông tin tài khoản</h2>
+      <h2 data-i18n="account.sectionAccount">Thông tin tài khoản</h2>
 
       <div class="info-row" id="view-full-name">
         <div class="info-text">
-          <span class="info-label">Họ và tên</span>
+          <span class="info-label" data-i18n="account.fullNameLabel">Họ và tên</span>
           <span class="info-value" id="value-full-name">—</span>
         </div>
-        <button class="icon-btn" id="edit-full-name-btn" title="Sửa">✏️</button>
+        <button class="icon-btn" id="edit-full-name-btn" data-i18n-title="common.edit" title="Sửa">✏️</button>
       </div>
       <div class="edit-row" id="edit-full-name">
-        <label for="input-full-name">Họ và tên</label>
+        <label for="input-full-name" data-i18n="account.fullNameLabel">Họ và tên</label>
         <input type="text" id="input-full-name" />
         <div class="error" id="error-full-name"></div>
         <div class="edit-actions">
-          <button class="btn-cancel" id="cancel-full-name">Huỷ</button>
-          <button class="btn-save" id="save-full-name">Lưu</button>
+          <button class="btn-cancel" id="cancel-full-name" data-i18n="account.cancel">Huỷ</button>
+          <button class="btn-save" id="save-full-name" data-i18n="account.save">Lưu</button>
         </div>
       </div>
 
       <div class="info-row">
         <div class="info-text">
-          <span class="info-label">Email</span>
+          <span class="info-label" data-i18n="account.emailLabel">Email</span>
           <span class="info-value" id="value-email">—</span>
         </div>
       </div>
 
       <div class="info-row">
         <div class="info-text">
-          <span class="info-label">Số điện thoại</span>
-          <span class="info-value muted">(chưa cập nhật)</span>
+          <span class="info-label" data-i18n="account.phoneLabel">Số điện thoại</span>
+          <span class="info-value muted" data-i18n="account.notUpdated">(chưa cập nhật)</span>
         </div>
       </div>
 
@@ -179,76 +194,84 @@
            mật khẩu cũ hay email xác thực, vì đã đăng nhập hợp lệ rồi. -->
       <div class="info-row" id="view-password">
         <div class="info-text">
-          <span class="info-label">Mật khẩu</span>
+          <span class="info-label" data-i18n="account.passwordLabel">Mật khẩu</span>
           <span class="info-value">••••••••</span>
         </div>
-        <button class="icon-btn" id="edit-password-btn" title="Đổi mật khẩu">✏️</button>
+        <button class="icon-btn" id="edit-password-btn" data-i18n-title="account.changePassword" title="Đổi mật khẩu">✏️</button>
       </div>
       <div class="edit-row" id="edit-password">
-        <label for="new-password">Mật khẩu mới</label>
+        <label for="new-password" data-i18n="account.newPasswordLabel">Mật khẩu mới</label>
         <input type="password" id="new-password" minlength="6" />
-        <label for="confirm-password">Nhập lại mật khẩu mới</label>
+        <label for="confirm-password" data-i18n="account.confirmPasswordLabel">Nhập lại mật khẩu mới</label>
         <input type="password" id="confirm-password" minlength="6" />
         <div class="error" id="error-password"></div>
         <div class="success" id="success-password"></div>
         <div class="edit-actions">
-          <button class="btn-cancel" id="cancel-password">Huỷ</button>
-          <button class="btn-save" id="save-password-btn">Lưu</button>
+          <button class="btn-cancel" id="cancel-password" data-i18n="account.cancel">Huỷ</button>
+          <button class="btn-save" id="save-password-btn" data-i18n="account.save">Lưu</button>
         </div>
       </div>
     </div>
 
     <!-- Thông tin cơ thể — chỉ hiện mục đã điền, mỗi mục sửa riêng -->
     <div class="card">
-      <h2>Thông tin cơ thể</h2>
+      <h2 data-i18n="account.sectionBody">Thông tin cơ thể</h2>
       <div id="body-info-rows"></div>
-      <button class="add-field-link" id="add-field-btn" style="display:none;">+ Thêm thông tin còn thiếu</button>
+      <button class="add-field-link" id="add-field-btn" style="display:none;" data-i18n="account.addMissing">+ Thêm thông tin còn thiếu</button>
 
       <div class="edit-row" id="edit-missing-fields">
         <div id="missing-fields-inputs"></div>
         <div class="error" id="error-missing"></div>
         <div class="edit-actions">
-          <button class="btn-cancel" id="cancel-missing">Huỷ</button>
-          <button class="btn-save" id="save-missing">Lưu</button>
+          <button class="btn-cancel" id="cancel-missing" data-i18n="account.cancel">Huỷ</button>
+          <button class="btn-save" id="save-missing" data-i18n="account.save">Lưu</button>
         </div>
       </div>
     </div>
 
     <!-- Lịch tập -->
     <div class="card">
-      <h2>Lịch tập</h2>
-      <p class="subtitle" style="margin-bottom:16px;">Xem lịch tập 4 tuần đã sinh cho bạn.</p>
-      <a href="workout-plan.html" class="submit">Xem lịch tập</a>
+      <h2 data-i18n="account.sectionPlan">Lịch tập</h2>
+      <p class="subtitle" style="margin-bottom:16px;" data-i18n="account.planBody">Xem lịch tập 4 tuần đã sinh cho bạn.</p>
+      <a href="workout-plan.html" class="submit" data-i18n="account.viewPlan">Xem lịch tập</a>
     </div>
 
     <!-- Quản trị — chỉ hiện với tài khoản is_admin=True -->
     <div class="card" id="admin-card" style="display:none;">
-      <h2>Quản trị</h2>
-      <p class="subtitle" style="margin-bottom:16px;">Xem danh sách email đã đăng ký tải trước.</p>
-      <a href="admin-waitlist.html" class="submit">Xem danh sách chờ</a>
+      <h2 data-i18n="account.sectionAdmin">Quản trị</h2>
+      <p class="subtitle" style="margin-bottom:16px;" data-i18n="account.adminBody">Xem danh sách email đã đăng ký tải trước.</p>
+      <a href="admin-waitlist.html" class="submit" data-i18n="account.viewWaitlist">Xem danh sách chờ</a>
     </div>
 
-    <button class="logout" id="logout-btn">Đăng xuất</button>
+    <button class="logout" id="logout-btn" data-i18n="nav.logout">Đăng xuất</button>
   </div>
 </main>
 
+<script src="assets/js/i18n.js"></script>
 <script src="assets/js/onboarding-options.js"></script>
 <script src="assets/js/workout-plan.js"></script>
 <script>
   // Định nghĩa 6 trường thông tin cơ thể — nguồn duy nhất cho cả phần xem
   // lẫn phần sửa, tránh lặp code cho từng trường.
   const BODY_FIELDS = [
-    { key: "gender", label: "Giới tính", type: "chip", options: ["Male", "Female", "Other"] },
-    { key: "age", label: "Tuổi", type: "number", min: 1, max: 120 },
-    { key: "height_cm", label: "Chiều cao (cm)", type: "number", min: 140, max: 220 },
-    { key: "weight_kg", label: "Cân nặng (kg)", type: "number", min: 35, max: 180 },
-    { key: "fitness_level", label: "Trình độ tập luyện", type: "chip", options: ["Beginner", "Intermediate", "Advanced"] },
-    { key: "weekly_goal", label: "Buổi tập/tuần", type: "number", min: 1, max: 7 },
+    { key: "gender", labelKey: "account.genderLabel", type: "chip", options: ["Male", "Female", "Other"] },
+    { key: "age", labelKey: "account.ageLabel", type: "number", min: 1, max: 120 },
+    { key: "height_cm", labelKey: "account.heightLabel", type: "number", min: 140, max: 220 },
+    { key: "weight_kg", labelKey: "account.weightLabel", type: "number", min: 35, max: 180 },
+    { key: "fitness_level", labelKey: "account.fitnessLevelLabel", type: "chip", options: ["Beginner", "Intermediate", "Advanced"] },
+    { key: "weekly_goal", labelKey: "account.weeklyGoalLabel", type: "number", min: 1, max: 7 },
   ];
 
   let currentFullName = "";
   let currentEmail = "";
   let currentProfile = {};
+
+  // Phần sinh bằng JS (nhãn các trường cơ thể, "(chưa cập nhật)") không nằm
+  // trong [data-i18n] nên applyI18n() không chạm tới — vẽ lại tay khi đổi ngôn ngữ.
+  document.addEventListener("posturex:langchange", () => {
+    renderBodyInfo(currentProfile);
+    if (!currentFullName) document.getElementById("value-full-name").textContent = t("account.notUpdated");
+  });
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -275,18 +298,18 @@
       row.innerHTML = `
         <div class="info-row" id="${viewId}">
           <div class="info-text">
-            <span class="info-label">${field.label}</span>
+            <span class="info-label">${t(field.labelKey)}</span>
             <span class="info-value">${escapeHtml(displayValue)}</span>
           </div>
-          <button class="icon-btn" data-edit-field="${field.key}" title="Sửa">✏️</button>
+          <button class="icon-btn" data-edit-field="${field.key}" title="${t("common.edit")}">✏️</button>
         </div>
         <div class="edit-row" id="${editId}">
-          <label>${field.label}</label>
+          <label>${t(field.labelKey)}</label>
           <div id="${editId}-input"></div>
           <div class="error" id="error-${field.key}"></div>
           <div class="edit-actions">
-            <button class="btn-cancel" data-cancel-field="${field.key}">Huỷ</button>
-            <button class="btn-save" data-save-field="${field.key}">Lưu</button>
+            <button class="btn-cancel" data-cancel-field="${field.key}">${t("account.cancel")}</button>
+            <button class="btn-save" data-save-field="${field.key}">${t("account.save")}</button>
           </div>
         </div>
       `;
@@ -349,7 +372,7 @@
     errorBox.style.display = "none";
     const value = readFieldValue(field);
     if (value == null) {
-      errorBox.textContent = "Vui lòng nhập giá trị.";
+      errorBox.textContent = t("account.enterValue");
       errorBox.style.display = "block";
       return;
     }
@@ -361,7 +384,7 @@
         body: JSON.stringify({ [field.key]: value }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Không lưu được.");
+      if (!res.ok) throw new Error(data.detail || t("account.saveFailed"));
       renderBodyInfo(data);
       await regenerateCachedPlanIfNeeded(data);
     } catch (err) {
@@ -422,7 +445,7 @@
     missingFields.forEach((field) => {
       const wrap = document.createElement("div");
       wrap.style.marginBottom = "14px";
-      wrap.innerHTML = `<label>${field.label}</label><div id="missing-input-${field.key}"></div>`;
+      wrap.innerHTML = `<label>${t(field.labelKey)}</label><div id="missing-input-${field.key}"></div>`;
       container.appendChild(wrap);
       renderFieldInput(`missing-input-${field.key}`, field, null);
     });
@@ -453,7 +476,7 @@
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Không lưu được.");
+      if (!res.ok) throw new Error(data.detail || t("account.saveFailed"));
       panel.classList.remove("active");
       renderBodyInfo(data);
       await regenerateCachedPlanIfNeeded(data);
@@ -478,7 +501,7 @@
     errorBox.style.display = "none";
     const newName = document.getElementById("input-full-name").value.trim();
     if (!newName) {
-      errorBox.textContent = "Họ tên không được để trống.";
+      errorBox.textContent = t("account.fullNameEmpty");
       errorBox.style.display = "block";
       return;
     }
@@ -490,7 +513,7 @@
         body: JSON.stringify({ full_name: newName }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Không lưu được.");
+      if (!res.ok) throw new Error(data.detail || t("account.saveFailed"));
       currentFullName = data.full_name || newName;
       document.getElementById("value-full-name").textContent = currentFullName;
       document.getElementById("view-full-name").style.display = "flex";
@@ -533,12 +556,12 @@
     const confirmPassword = document.getElementById("confirm-password").value;
 
     if (!newPassword) {
-      errorBox.textContent = "Vui lòng nhập mật khẩu mới.";
+      errorBox.textContent = t("account.passwordEmpty");
       errorBox.style.display = "block";
       return;
     }
     if (newPassword !== confirmPassword) {
-      errorBox.textContent = "Mật khẩu nhập lại không khớp.";
+      errorBox.textContent = t("account.passwordMismatch");
       errorBox.style.display = "block";
       return;
     }
@@ -553,7 +576,7 @@
         body: JSON.stringify({ password: newPassword }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Không đổi được mật khẩu.");
+      if (!res.ok) throw new Error(data.detail || t("account.passwordChangeFailed"));
 
       document.getElementById("new-password").value = "";
       document.getElementById("confirm-password").value = "";
@@ -580,7 +603,7 @@
 
       currentFullName = me.full_name || "";
       currentEmail = me.email;
-      document.getElementById("value-full-name").textContent = currentFullName || "(chưa cập nhật)";
+      document.getElementById("value-full-name").textContent = currentFullName || t("account.notUpdated");
       document.getElementById("value-email").textContent = me.email;
       if (me.is_admin) document.getElementById("admin-card").style.display = "block";
 

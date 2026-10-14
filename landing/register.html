@@ -36,6 +36,15 @@
   }
   header.top-bar .home-link { font-size: 0.86rem; color: var(--text-secondary); }
   header.top-bar .home-link:hover { color: var(--text-primary); }
+  .lang-toggle {
+    display: flex; align-items: center; gap: 2px; background: var(--surface-elevated);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px; margin-left: 14px;
+  }
+  .lang-toggle button {
+    background: none; border: none; color: var(--text-secondary); font-family: inherit;
+    font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--primary); color: var(--on-primary); }
   main.center-wrap {
     min-height: calc(100vh - 73px);
     display: flex; align-items: flex-start; justify-content: center; padding: 40px 24px;
@@ -108,7 +117,13 @@
     <img src="assets/images/logo-icon.png" width="24" height="24" alt="" style="border-radius:6px;" />
     PostureX
   </a>
-  <a href="index.html" class="home-link">← Trang chủ</a>
+  <div style="display:flex; align-items:center;">
+    <a href="index.html" class="home-link" data-i18n="nav.backHome">← Trang chủ</a>
+    <div class="lang-toggle">
+      <button type="button" data-lang-toggle="vi" onclick="setLang('vi')">VI</button>
+      <button type="button" data-lang-toggle="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
 </header>
 
 <main class="center-wrap">
@@ -118,108 +133,109 @@
 
   <!-- Bước 1: email/mật khẩu/họ tên -->
   <section class="step active" id="step-1">
-    <h1>Tạo tài khoản</h1>
-    <p class="subtitle">Tài khoản này dùng đăng nhập được luôn trên app PostureX.</p>
+    <h1 data-i18n="register.step1.title">Tạo tài khoản</h1>
+    <p class="subtitle" data-i18n="register.step1.subtitle">Tài khoản này dùng đăng nhập được luôn trên app PostureX.</p>
     <form id="form-1">
-      <label for="full-name">Họ tên</label>
+      <label for="full-name" data-i18n="register.fullNameLabel">Họ tên</label>
       <input type="text" id="full-name" required />
-      <label for="email">Email</label>
+      <label for="email" data-i18n="register.emailLabel">Email</label>
       <input type="email" id="email" required />
-      <label for="password">Mật khẩu</label>
+      <label for="password" data-i18n="register.passwordLabel">Mật khẩu</label>
       <input type="password" id="password" minlength="6" required />
-      <label for="password-confirm">Nhập lại mật khẩu</label>
+      <label for="password-confirm" data-i18n="register.passwordConfirmLabel">Nhập lại mật khẩu</label>
       <input type="password" id="password-confirm" minlength="6" required />
       <div class="error" id="error-1"></div>
       <div class="btn-row">
-        <button type="submit" class="submit" id="submit-1">Tiếp tục</button>
+        <button type="submit" class="submit" id="submit-1" data-i18n="register.continue">Tiếp tục</button>
       </div>
     </form>
-    <p class="hint">Đã có tài khoản? <a href="login.html" style="color:var(--primary); font-weight:600;">Đăng nhập</a></p>
+    <p class="hint"><span data-i18n="register.haveAccount">Đã có tài khoản?</span> <a href="login.html" style="color:var(--primary); font-weight:600;" data-i18n="register.loginNow">Đăng nhập</a></p>
   </section>
 
   <!-- Bước 2: OTP -->
   <section class="step" id="step-2">
-    <h1>Xác thực email</h1>
-    <p class="subtitle">Nhập mã 6 số vừa gửi tới email của bạn.</p>
+    <h1 data-i18n="register.step2.title">Xác thực email</h1>
+    <p class="subtitle" data-i18n="register.step2.subtitle">Nhập mã 6 số vừa gửi tới email của bạn.</p>
     <form id="form-2">
-      <label for="otp-code">Mã xác thực</label>
+      <label for="otp-code" data-i18n="register.otpLabel">Mã xác thực</label>
       <input type="text" id="otp-code" inputmode="numeric" maxlength="6" required />
       <div class="error" id="error-2"></div>
       <div class="btn-row">
-        <button type="submit" class="submit" id="submit-2">Xác nhận</button>
+        <button type="submit" class="submit" id="submit-2" data-i18n="register.confirm">Xác nhận</button>
       </div>
     </form>
-    <button class="link-btn" id="resend-otp">Gửi lại mã</button>
+    <button class="link-btn" id="resend-otp" data-i18n="register.resendOtp">Gửi lại mã</button>
   </section>
 
   <!-- Bước 3: thông tin thể chất -->
   <section class="step" id="step-3">
-    <h1>Thông tin cơ thể</h1>
-    <p class="subtitle">Giúp PostureX cá nhân hoá lịch tập cho bạn.</p>
+    <h1 data-i18n="register.step3.title">Thông tin cơ thể</h1>
+    <p class="subtitle" data-i18n="register.step3.subtitle">Giúp PostureX cá nhân hoá lịch tập cho bạn.</p>
     <form id="form-3">
-      <label>Giới tính</label>
+      <label data-i18n="register.genderLabel">Giới tính</label>
       <div class="chip-group" id="chips-gender"></div>
 
       <div class="row-2">
         <div>
-          <label for="age">Tuổi</label>
+          <label for="age" data-i18n="register.ageLabel">Tuổi</label>
           <input type="number" id="age" min="14" max="90" required />
         </div>
         <div>
-          <label for="weekly-goal">Buổi tập/tuần</label>
+          <label for="weekly-goal" data-i18n="register.weeklyGoalLabel">Buổi tập/tuần</label>
           <input type="number" id="weekly-goal" min="1" max="7" required />
         </div>
       </div>
       <div class="row-2">
         <div>
-          <label for="height">Chiều cao (cm)</label>
+          <label for="height" data-i18n="register.heightLabel">Chiều cao (cm)</label>
           <input type="number" id="height" min="140" max="220" required />
         </div>
         <div>
-          <label for="weight">Cân nặng (kg)</label>
+          <label for="weight" data-i18n="register.weightLabel">Cân nặng (kg)</label>
           <input type="number" id="weight" min="35" max="180" required />
         </div>
       </div>
 
-      <label>Trình độ tập luyện</label>
+      <label data-i18n="register.fitnessLevelLabel">Trình độ tập luyện</label>
       <div class="chip-group" id="chips-fitness-level"></div>
 
       <div class="error" id="error-3"></div>
       <div class="btn-row">
-        <button type="submit" class="submit" id="submit-3">Tiếp tục</button>
+        <button type="submit" class="submit" id="submit-3" data-i18n="register.continue">Tiếp tục</button>
       </div>
     </form>
   </section>
 
   <!-- Bước 4: mục tiêu & lịch tập -->
   <section class="step" id="step-4">
-    <h1>Mục tiêu tập luyện</h1>
-    <p class="subtitle">Chọn càng chi tiết, lịch tập sinh ra càng sát với bạn.</p>
+    <h1 data-i18n="register.step4.title">Mục tiêu tập luyện</h1>
+    <p class="subtitle" data-i18n="register.step4.subtitle">Chọn càng chi tiết, lịch tập sinh ra càng sát với bạn.</p>
     <form id="form-4">
-      <label>Ngày tập trong tuần</label>
+      <label data-i18n="register.workoutDaysLabel">Ngày tập trong tuần</label>
       <div class="chip-group" id="chips-workout-days"></div>
 
-      <label>Nhóm cơ trọng tâm</label>
+      <label data-i18n="register.focusAreasLabel">Nhóm cơ trọng tâm</label>
       <div class="chip-group" id="chips-focus-areas"></div>
 
-      <label>Thiết bị sẵn có</label>
+      <label data-i18n="register.equipmentLabel">Thiết bị sẵn có</label>
       <div class="chip-group" id="chips-equipment"></div>
 
-      <label>Mục tiêu</label>
+      <label data-i18n="register.goalsLabel">Mục tiêu</label>
       <div class="chip-group" id="chips-goals"></div>
 
-      <label>Vấn đề sức khoẻ (nếu có)</label>
+      <label data-i18n="register.healthIssuesLabel">Vấn đề sức khoẻ (nếu có)</label>
       <div class="chip-group" id="chips-health-issues"></div>
 
       <div class="error" id="error-4"></div>
       <div class="btn-row">
-        <button type="submit" class="submit" id="submit-4">Hoàn tất</button>
+        <button type="submit" class="submit" id="submit-4" data-i18n="register.finish">Hoàn tất</button>
       </div>
     </form>
   </section>
 </div>
 </main>
 
+<script src="assets/js/i18n.js"></script>
 <script src="assets/js/onboarding-options.js"></script>
 <script src="assets/js/workout-plan.js"></script>
 <script>
@@ -242,11 +258,19 @@
 
   const STEPS = ["step-1", "step-2", "step-3", "step-4"];
 
+  let currentStep = 0;
+  function renderStepLabel() {
+    document.getElementById("step-label").textContent = t("register.stepLabel", { n: currentStep + 1 });
+  }
+  document.addEventListener("DOMContentLoaded", renderStepLabel);
+  document.addEventListener("posturex:langchange", renderStepLabel);
+
   function goToStep(index) {
     STEPS.forEach((id, i) => {
       document.getElementById(id).classList.toggle("active", i === index);
     });
-    document.getElementById("step-label").textContent = `Bước ${index + 1}/4`;
+    currentStep = index;
+    renderStepLabel();
     document.getElementById("progress-fill").style.width = `${((index + 1) / 4) * 100}%`;
   }
 
@@ -264,7 +288,7 @@
     const btn = document.getElementById(btnId);
     btn.disabled = isSubmitting;
     if (isSubmitting) btn.dataset.originalText = btn.textContent;
-    btn.textContent = isSubmitting ? "Đang xử lý..." : (label || btn.dataset.originalText || btn.textContent);
+    btn.textContent = isSubmitting ? t("common.processing") : (label || btn.dataset.originalText || btn.textContent);
   }
 
   // --- Chip multi/single-select dùng chung ---
@@ -329,7 +353,7 @@
     const confirm = document.getElementById("password-confirm").value;
 
     if (password !== confirm) {
-      showError("error-1", "Mật khẩu nhập lại không khớp.");
+      showError("error-1", t("register.passwordMismatch"));
       return;
     }
 
@@ -341,7 +365,7 @@
         body: JSON.stringify({ email, password, full_name: fullName }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Đăng ký thất bại.");
+      if (!res.ok) throw new Error(data.detail || t("register.failed"));
 
       state.email = email;
       state.fullName = fullName;
@@ -349,7 +373,7 @@
     } catch (err) {
       showError("error-1", err.message);
     } finally {
-      setSubmitting("submit-1", false, "Tiếp tục");
+      setSubmitting("submit-1", false, t("register.continue"));
     }
   });
 
@@ -368,13 +392,13 @@
         body: JSON.stringify({ email: state.email, otp_code: otpCode }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Mã xác thực không đúng.");
+      if (!res.ok) throw new Error(data.detail || t("register.otpInvalid"));
 
       goToStep(2);
     } catch (err) {
       showError("error-2", err.message);
     } finally {
-      setSubmitting("submit-2", false, "Xác nhận");
+      setSubmitting("submit-2", false, t("register.confirm"));
     }
   });
 
@@ -387,7 +411,7 @@
         body: JSON.stringify({ email: state.email }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Không gửi lại được mã.");
+      if (!res.ok) throw new Error(data.detail || t("register.otpResendFailed"));
     } catch (err) {
       showError("error-2", err.message);
     }
@@ -398,8 +422,8 @@
     e.preventDefault();
     hideError("error-3");
 
-    if (!state.gender) return showError("error-3", "Vui lòng chọn giới tính.");
-    if (!state.fitnessLevel) return showError("error-3", "Vui lòng chọn trình độ.");
+    if (!state.gender) return showError("error-3", t("register.selectGender"));
+    if (!state.fitnessLevel) return showError("error-3", t("register.selectFitnessLevel"));
 
     state.age = Number(document.getElementById("age").value);
     state.heightCm = Number(document.getElementById("height").value);
@@ -431,7 +455,7 @@
       });
       if (!profileRes.ok) {
         const data = await profileRes.json();
-        throw new Error(data.detail || "Không lưu được hồ sơ.");
+        throw new Error(data.detail || t("register.profileSaveFailed"));
       }
 
       const exercisesRes = await fetch("/api/exercises", { credentials: "include" });
@@ -484,7 +508,7 @@
       window.location.href = "index.html";
     } catch (err) {
       showError("error-4", err.message);
-      setSubmitting("submit-4", false, "Hoàn tất");
+      setSubmitting("submit-4", false, t("register.finish"));
     }
   });
 </script>

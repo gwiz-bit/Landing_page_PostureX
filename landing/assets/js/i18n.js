@@ -11,6 +11,12 @@
 
 const I18N = {
   vi: {
+    "common.processing": "Đang xử lý...",
+    "common.edit": "Sửa",
+    "common.remove": "Xoá",
+    "account.loading": "Đang tải hồ sơ...",
+    "account.changePassword": "Đổi mật khẩu",
+    "plan.backToProfile": "← Hồ sơ",
     // --- Thanh điều hướng dùng chung mọi trang ---
     "nav.howItWorks": "Cách hoạt động",
     "nav.features": "Tính năng",
@@ -265,6 +271,12 @@ const I18N = {
   },
 
   en: {
+    "common.processing": "Processing...",
+    "common.edit": "Edit",
+    "common.remove": "Remove",
+    "account.loading": "Loading your profile...",
+    "account.changePassword": "Change password",
+    "plan.backToProfile": "← Profile",
     "nav.howItWorks": "How it works",
     "nav.features": "Features",
     "nav.mission": "Why PostureX",
@@ -508,6 +520,11 @@ function getLang() {
   }
 }
 
+// Locale cho toLocaleDateString/toLocaleString theo ngôn ngữ đang chọn.
+function getLocale() {
+  return getLang() === "en" ? "en-US" : "vi-VN";
+}
+
 function setLang(lang) {
   try {
     localStorage.setItem("posturex_lang", lang);
@@ -542,6 +559,9 @@ function applyI18n() {
   });
   document.querySelectorAll("[data-i18n-title]").forEach((el) => {
     el.title = t(el.dataset.i18nTitle);
+  });
+  document.querySelectorAll("[data-i18n-alt]").forEach((el) => {
+    el.alt = t(el.dataset.i18nAlt);
   });
   document.querySelectorAll("[data-lang-toggle]").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.langToggle === getLang());

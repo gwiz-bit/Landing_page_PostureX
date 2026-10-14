@@ -41,6 +41,15 @@
     border-radius: 999px; padding: 7px 16px; font-family: inherit; font-size: 0.82rem; cursor: pointer;
   }
   nav.top-links button:hover { border-color: var(--primary); color: var(--text-primary); }
+  .lang-toggle {
+    display: flex; align-items: center; gap: 2px; background: var(--surface-elevated);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px; margin-left: 14px;
+  }
+  .lang-toggle button {
+    background: none; border: none; color: var(--text-secondary); font-family: inherit;
+    font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--primary); color: var(--on-primary); }
   main.wrap { max-width: 920px; margin: 0 auto; padding: 36px 24px 80px; }
   h1 { font-family: "Inter", sans-serif; font-size: 1.5rem; margin: 0 0 4px; }
   .subtitle { color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 28px; }
@@ -123,19 +132,25 @@
     <img src="assets/images/logo-icon.png" width="24" height="24" alt="" style="border-radius:6px;" />
     PostureX
   </a>
-  <nav class="top-links">
-    <a href="account.html">← Hồ sơ</a>
-    <button id="logout-btn">Đăng xuất</button>
-  </nav>
+  <div style="display:flex; align-items:center;">
+    <nav class="top-links">
+      <a href="account.html" data-i18n="plan.backToProfile">← Hồ sơ</a>
+      <button id="logout-btn" data-i18n="nav.logout">Đăng xuất</button>
+    </nav>
+    <div class="lang-toggle">
+      <button type="button" data-lang-toggle="vi" onclick="setLang('vi')">VI</button>
+      <button type="button" data-lang-toggle="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
 </header>
 
 <main class="wrap">
-  <div id="loading">Đang tải lịch tập...</div>
+  <div id="loading" data-i18n="plan.loading">Đang tải lịch tập...</div>
   <div id="error-box" style="display:none;"></div>
 
   <div id="content" style="display:none;">
     <h1 id="greeting">Xin chào</h1>
-    <p class="subtitle">Lịch tập 4 tuần của bạn — bấm vào một ngày để xem chi tiết.</p>
+    <p class="subtitle" data-i18n="plan.subtitle">Lịch tập 4 tuần của bạn — bấm vào một ngày để xem chi tiết.</p>
 
     <div class="calendar-grid" id="weekday-header"></div>
     <div class="calendar-grid" id="calendar-grid"></div>
@@ -144,14 +159,29 @@
   </div>
 </main>
 
+<script src="assets/js/i18n.js"></script>
 <script src="assets/js/onboarding-options.js"></script>
 <script src="assets/js/workout-plan.js"></script>
 <script>
   let plan = null;
   let currentEmail = null;
+  let greetingName = "";
+
+  function renderGreeting() {
+    if (greetingName) document.getElementById("greeting").textContent = t("plan.greeting", { name: greetingName });
+  }
+
+  // Lịch/chi tiết ngày được sinh bằng JS (ngày theo locale, chữ trong template)
+  // nên phải vẽ lại tay khi đổi ngôn ngữ. Đang mở form sửa dở thì quay về xem.
+  document.addEventListener("posturex:langchange", () => {
+    if (!plan) return;
+    renderGreeting();
+    renderCalendar();
+    if (selectedIndex !== null) selectDay(selectedIndex);
+  });
 
   function formatDateShort(date) {
-    return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+    return date.toLocaleDateString(getLocale(), { day: "2-digit", month: "2-digit" });
   }
 
   function isSameDate(a, b) {
@@ -197,7 +227,7 @@
   }
 
   function dateLabel(date) {
-    return date.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "numeric" });
+    return date.toLocaleDateString(getLocale(), { weekday: "long", day: "numeric", month: "numeric" });
   }
 
   function selectDay(index) {
@@ -216,12 +246,12 @@
       detail.innerHTML = `
         <div class="detail-header">
           <div>
-            <h2>Ngày nghỉ</h2>
+            <h2>${t("plan.restDay")}</h2>
             <div class="detail-date">${dateLabel(date)}</div>
           </div>
-          <button class="icon-btn" id="edit-day-btn" title="Sửa">✏️</button>
+          <button class="icon-btn" id="edit-day-btn" title="${t("common.edit")}">✏️</button>
         </div>
-        <p style="color:var(--text-secondary); margin:0;">Không có buổi tập nào hôm nay — nghỉ ngơi và hồi phục.</p>
+        <p style="color:var(--text-secondary); margin:0;">${t("plan.restDayBody")}</p>
       `;
     } else {
       detail.innerHTML = `
@@ -230,7 +260,7 @@
             <h2>${escapeHtml(day.sessionName)}</h2>
             <div class="detail-date">${dateLabel(date)}</div>
           </div>
-          <button class="icon-btn" id="edit-day-btn" title="Sửa">✏️</button>
+          <button class="icon-btn" id="edit-day-btn" title="${t("common.edit")}">✏️</button>
         </div>
         ${day.exercises
           .map((ex) => `<div class="exercise-row"><span>${escapeHtml(ex.name)}</span><span class="sets-reps">${escapeHtml(ex.setsReps)}</span></div>`)
@@ -253,9 +283,9 @@
         .map(
           (ex, i) => `
         <div class="exercise-edit-row">
-          <input type="text" placeholder="Tên bài tập" value="${escapeAttr(ex.name)}" data-ex-name="${i}" />
-          <input type="text" placeholder="Sets × reps" value="${escapeAttr(ex.setsReps)}" data-ex-setsreps="${i}" />
-          <button class="remove-exercise-btn" data-remove="${i}" title="Xoá">✕</button>
+          <input type="text" placeholder="${t("plan.exerciseNamePlaceholder")}" value="${escapeAttr(ex.name)}" data-ex-name="${i}" />
+          <input type="text" placeholder="${t("plan.setsRepsPlaceholder")}" value="${escapeAttr(ex.setsReps)}" data-ex-setsreps="${i}" />
+          <button class="remove-exercise-btn" data-remove="${i}" title="${t("common.remove")}">✕</button>
         </div>
       `
         )
@@ -284,14 +314,14 @@
 
     detail.innerHTML = `
       <div class="detail-date" style="margin-bottom:12px;">${dateLabel(date)}</div>
-      <label for="edit-session-name">Tên buổi tập</label>
-      <input type="text" id="edit-session-name" value="${escapeAttr(day.exercises.length === 0 ? "" : day.sessionName)}" placeholder="vd Full Body Strength" style="margin-bottom:16px;" />
+      <label for="edit-session-name">${t("plan.sessionNameLabel")}</label>
+      <input type="text" id="edit-session-name" value="${escapeAttr(day.exercises.length === 0 ? "" : day.sessionName)}" placeholder="${t("plan.sessionNamePlaceholder")}" style="margin-bottom:16px;" />
       <div id="exercise-edit-rows">${renderExerciseRows()}</div>
-      <button class="add-exercise-link" id="add-exercise-btn">+ Thêm bài tập</button>
+      <button class="add-exercise-link" id="add-exercise-btn">${t("plan.addExercise")}</button>
       <div class="detail-error" id="day-edit-error" style="display:none;"></div>
       <div class="detail-edit-actions">
-        <button class="btn-cancel" id="cancel-day-edit">Huỷ</button>
-        <button class="btn-save" id="save-day-edit">Lưu</button>
+        <button class="btn-cancel" id="cancel-day-edit">${t("account.cancel")}</button>
+        <button class="btn-save" id="save-day-edit">${t("account.save")}</button>
       </div>
     `;
 
@@ -309,7 +339,7 @@
         .map((d) => ({ name: d.name.trim(), setsReps: d.setsReps.trim() || "3 × 10" }));
 
       if (cleanExercises.length > 0 && !sessionNameInput) {
-        errorBox.textContent = "Vui lòng đặt tên cho buổi tập.";
+        errorBox.textContent = t("plan.sessionNameRequired");
         errorBox.style.display = "block";
         return;
       }
@@ -368,7 +398,8 @@
       }
       const me = await meRes.json();
       currentEmail = me.email;
-      document.getElementById("greeting").textContent = `Xin chào, ${me.full_name || me.email}`;
+      greetingName = me.full_name || me.email;
+      renderGreeting();
 
       // localStorage lưu trên CẢ THIẾT BỊ (không phải riêng 1 tab) — khớp
       // TokenStorage.savePlanParams()/readPlanParams() của app, đọc lại đầy
@@ -413,7 +444,7 @@
       content.style.display = "block";
     } catch (err) {
       loading.style.display = "none";
-      errorBox.innerHTML = `<p class="error-text">Không tải được lịch tập. Vui lòng tải lại trang.</p>`;
+      errorBox.innerHTML = `<p class="error-text">${t("plan.loadError")}</p>`;
       errorBox.style.display = "block";
     }
   })();

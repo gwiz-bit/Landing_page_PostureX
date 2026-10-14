@@ -13,6 +13,7 @@ Landing page cho app PostureX (đồ án EXE202, FPT). Mục tiêu chính: thu h
   - `workout-plan.html` — lịch tập 4 tuần (**tên cũ là `home.html`, đã đổi** vì nó không phải trang chủ). Sửa được từng ngày tại chỗ (đổi tên buổi/thêm-bớt-sửa bài tập), giống `_DayDetailSheet` bên app.
   - `admin-waitlist.html` — chỉ admin, xem + xuất CSV danh sách waitlist.
   - `assets/js/onboarding-options.js`, `assets/js/workout-plan.js` — **port 1:1 từ `lib/models/onboarding_options.dart`/`workout_plan.dart` bên repo app**. Đổi logic bên app thì nhớ đổi cả 2 file JS này, không tự động đồng bộ.
+  - `assets/js/i18n.js` — **chuyển ngôn ngữ VI/EN** cho mọi trang (nút VI/EN ở header). Từ điển `I18N.vi`/`I18N.en` phải có CÙNG bộ khóa. HTML tĩnh dùng `data-i18n`/`data-i18n-placeholder`/`data-i18n-title`/`data-i18n-alt`; chuỗi trong JS dùng `t("khoá", {vars})`; ngày giờ dùng `getLocale()`. Lựa chọn lưu ở `localStorage` key `posturex_lang` (mặc định `vi`). Phần nội dung sinh bằng JS không nằm trong `[data-i18n]` thì phải tự vẽ lại ở listener sự kiện `posturex:langchange` (đã làm ở `register`, `account`, `workout-plan`, `admin-waitlist`). **Thêm chuỗi mới → thêm khóa vào CẢ HAI ngôn ngữ.**
   - `assets/images/`.
 - `backend/` — FastAPI, phục vụ luôn `landing/` qua `StaticFiles` (mount `/` phải đặt SAU mọi route khác trong `app/main.py`).
   - `app/api/routes/`: `auth.py` (register/verify-otp/resend-otp/login/logout/me, `require_login`, `require_admin`), `waitlist.py`, `admin.py`, `profile.py` (mới — `GET/PUT /api/profile`, `PATCH /api/account`, `GET /api/exercises`, đều proxy sang backend app).
@@ -114,3 +115,6 @@ Cần `backend/.env` (copy từ `.env.example`, đặt `SECRET_KEY`). Đăng nh�
     rồi XOÁ lại 2 route `forgot-password`/`reset-password` proxy (thử cách
     đổi mật khẩu qua email trước, sau đó bỏ để khớp đúng app — không còn
     dead code nào sót lại).
+- 2026-10-14 — **Hoàn thiện chuyển đổi ngôn ngữ VI/EN** (trước đó mới xong `index.html` + một phần `login.html`, commit "chua hoan thien"). Gắn i18n cho `register.html`, `account.html`, `workout-plan.html`, `admin-waitlist.html`, `not-found.html`; hoàn tất `login.html` (câu lỗi dự phòng) và `alt` ảnh ở `index.html` (thêm `data-i18n-alt`). `i18n.js`: thêm `getLocale()`, các khóa `common.processing/edit/remove`, `account.loading`, `account.changePassword`, `plan.backToProfile` (giờ 200 khóa, VI/EN khớp 100%, không khóa nào thiếu — đã kiểm bằng Node, cú pháp các `<script>` inline hợp lệ). Chưa test bằng trình duyệt thật.
+  - **Chưa dịch (cố ý/để sau):** nhãn lựa chọn (Male/Female, Beginner…, nhóm cơ/thiết bị/mục tiêu) và tên bài tập vẫn tiếng Anh vì là dữ liệu port 1:1 từ app; thông báo lỗi `detail` do backend app trả về (tiếng Việt); thẻ `<title>` của từng trang.
+  - Không đọc được CLAUDE.md của repo app (không có trong workspace này) — nếu app có quy ước i18n riêng (khóa, thuật ngữ) thì cần đối chiếu lại.

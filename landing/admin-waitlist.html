@@ -36,6 +36,15 @@
   }
   header.top-bar .home-link { font-size: 0.86rem; color: var(--text-secondary); }
   header.top-bar .home-link:hover { color: var(--text-primary); }
+  .lang-toggle {
+    display: flex; align-items: center; gap: 2px; background: var(--surface-elevated);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px; margin-left: 14px;
+  }
+  .lang-toggle button {
+    background: none; border: none; color: var(--text-secondary); font-family: inherit;
+    font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--primary); color: var(--on-primary); }
   main.wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
   h1 { font-family: "Inter", sans-serif; font-size: 1.5rem; margin: 0 0 6px; }
   .subtitle { color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 28px; }
@@ -86,32 +95,38 @@
     <img src="assets/images/logo-icon.png" width="24" height="24" alt="" style="border-radius:6px;" />
     PostureX
   </a>
-  <a href="index.html" class="home-link">← Trang chủ</a>
+  <div style="display:flex; align-items:center;">
+    <a href="index.html" class="home-link" data-i18n="nav.backHome">← Trang chủ</a>
+    <div class="lang-toggle">
+      <button type="button" data-lang-toggle="vi" onclick="setLang('vi')">VI</button>
+      <button type="button" data-lang-toggle="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
 </header>
 
 <main class="wrap">
-  <h1>Danh sách đăng ký tải trước</h1>
-  <p class="subtitle">Email người dùng đã đăng ký nhận thông báo khi PostureX ra mắt.</p>
+  <h1 data-i18n="admin.title">Danh sách đăng ký tải trước</h1>
+  <p class="subtitle" data-i18n="admin.subtitle">Email người dùng đã đăng ký nhận thông báo khi PostureX ra mắt.</p>
 
   <div class="error" id="error-box"></div>
-  <div id="loading">Đang tải danh sách...</div>
+  <div id="loading" data-i18n="admin.loading">Đang tải danh sách...</div>
 
   <div id="denied">
-    <h1 style="margin-bottom:4px;">Không có quyền truy cập</h1>
-    <p>Trang này chỉ dành cho tài khoản admin. <a href="login.html">Đăng nhập lại</a> bằng tài khoản admin.</p>
+    <h1 style="margin-bottom:4px;" data-i18n="admin.denied">Không có quyền truy cập</h1>
+    <p><span data-i18n="admin.deniedBody">Trang này chỉ dành cho tài khoản admin.</span> <a href="login.html" data-i18n="admin.loginAgain">Đăng nhập lại</a></p>
   </div>
 
-  <div id="empty" style="display:none;">Chưa có email nào đăng ký.</div>
+  <div id="empty" style="display:none;" data-i18n="admin.empty">Chưa có email nào đăng ký.</div>
 
   <div id="content" style="display:none;">
     <div class="toolbar">
-      <span class="count-badge">Tổng cộng <b id="total-count">0</b> email</span>
-      <button class="export" id="export-btn">Xuất CSV</button>
+      <span class="count-badge"><span data-i18n="admin.total">Tổng cộng</span> <b id="total-count">0</b> <span data-i18n="admin.totalSuffix">email</span></span>
+      <button class="export" id="export-btn" data-i18n="admin.export">Xuất CSV</button>
     </div>
     <div class="card">
       <table>
         <thead>
-          <tr><th>Email</th><th>Nguồn</th><th>Thời gian đăng ký</th></tr>
+          <tr><th data-i18n="admin.colEmail">Email</th><th data-i18n="admin.colSource">Nguồn</th><th data-i18n="admin.colTime">Thời gian đăng ký</th></tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
@@ -119,12 +134,13 @@
   </div>
 </main>
 
+<script src="assets/js/i18n.js"></script>
 <script>
   let currentEntries = [];
 
   function formatDate(iso) {
     const d = new Date(iso + (iso.endsWith("Z") ? "" : "Z"));
-    return d.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
+    return d.toLocaleString(getLocale(), { dateStyle: "short", timeStyle: "short" });
   }
 
   function escapeHtml(s) {
@@ -180,7 +196,7 @@
         return;
       }
       if (!res.ok) {
-        throw new Error("Không tải được danh sách. Vui lòng thử lại.");
+        throw new Error(t("admin.loadError"));
       }
 
       const data = await res.json();
@@ -201,6 +217,10 @@
   })();
 
   document.getElementById("export-btn").addEventListener("click", downloadCsv);
+  // Cột thời gian được vẽ bằng JS theo locale nên phải vẽ lại khi đổi ngôn ngữ.
+  document.addEventListener("posturex:langchange", () => {
+    if (currentEntries.length) render(currentEntries);
+  });
 </script>
 
 </body>
