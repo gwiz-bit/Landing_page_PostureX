@@ -198,15 +198,20 @@
       const me = await meRes.json();
       document.getElementById("greeting").textContent = `Xin chào, ${me.full_name || me.email}`;
 
-      // Vừa đăng ký xong trong CHÍNH tab này — dùng luôn lịch đã sinh kèm
-      // đầy đủ ngày tập/nhóm cơ/thiết bị/mục tiêu đã chọn.
-      const stored = sessionStorage.getItem("posturex_plan");
-      if (stored) {
-        plan = reviveDates(JSON.parse(stored));
+      // localStorage lưu trên CẢ THIẾT BỊ (không phải riêng 1 tab) — khớp
+      // TokenStorage.savePlanParams()/readPlanParams() của app, đọc lại đầy
+      // đủ ngày tập/nhóm cơ/thiết bị/mục tiêu lúc đăng nhập. Kiểm tra đúng
+      // email để tránh lộ lịch tập của tài khoản khác từng đăng ký trên
+      // cùng trình duyệt này.
+      const storedRaw = localStorage.getItem("posturex_plan");
+      const stored = storedRaw ? JSON.parse(storedRaw) : null;
+      if (stored && stored.email === me.email) {
+        plan = reviveDates(stored);
       } else {
-        // Đăng nhập bình thường — chỉ còn 5 trường có lưu ở backend, các
-        // trường còn lại (ngày tập/nhóm cơ/thiết bị/mục tiêu/vấn đề sức
-        // khoẻ) dùng mặc định, đúng hành vi applyAuthSession() của app.
+        // Chưa từng đăng ký trên máy này, hoặc là tài khoản khác — chỉ còn
+        // 5 trường có lưu ở backend, các trường còn lại (ngày tập/nhóm cơ/
+        // thiết bị/mục tiêu/vấn đề sức khoẻ) dùng mặc định, đúng hành vi
+        // applyAuthSession() của app khi chưa có TokenStorage.readPlanParams().
         const [profileRes, exercisesRes] = await Promise.all([
           fetch("/api/profile", { credentials: "include" }),
           fetch("/api/exercises", { credentials: "include" }),
@@ -242,7 +247,8 @@
   })();
 
   document.getElementById("logout-btn").addEventListener("click", async () => {
-    sessionStorage.removeItem("posturex_plan");
+    // Cố tình KHÔNG xoá "posturex_plan" — khớp TokenStorage.clearSession()
+    // của app, giữ lại lịch tập để đăng nhập lại trên máy này thấy ngay.
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     window.location.href = "login.html";
   });

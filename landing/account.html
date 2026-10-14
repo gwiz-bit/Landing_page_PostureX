@@ -315,7 +315,7 @@
   });
 
   document.getElementById("logout-btn")?.addEventListener("click", async () => {
-    sessionStorage.removeItem("posturex_plan");
+    // Cố tình KHÔNG xoá "posturex_plan" — xem ghi chú tương tự trong home.html.
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     window.location.href = "login.html";
   });

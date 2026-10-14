@@ -449,11 +449,15 @@
         serverExercises,
       });
 
-      // Chỉ sống trong tab này — đăng nhập lại ở phiên khác sẽ không còn
-      // (đúng quyết định đã thống nhất, xem CLAUDE.md/plan của tính năng này).
-      sessionStorage.setItem(
+      // localStorage (không phải sessionStorage) — khớp đúng hành vi thật của
+      // app: TokenStorage.savePlanParams() lưu cục bộ trên THIẾT BỊ (không
+      // phải riêng 1 tab), và đọc lại đầy đủ lúc đăng nhập (xem
+      // SessionRepositoryImpl._establish() trong repo app). Đăng nhập lại
+      // trên CÙNG trình duyệt/máy này vẫn thấy đúng lịch đã chọn.
+      localStorage.setItem(
         "posturex_plan",
         JSON.stringify({
+          email: state.email,
           startDate: plan.startDate.toISOString(),
           days: plan.days.map((d) => ({ ...d, date: d.date.toISOString() })),
         })
