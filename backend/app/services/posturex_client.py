@@ -36,9 +36,13 @@ async def register(email: str, password: str, full_name: str | None) -> dict:
         return resp.json()
 
 
-async def verify_otp_and_fetch_profile(email: str, otp_code: str) -> dict:
+async def verify_otp_and_fetch_profile(email: str, otp_code: str) -> tuple[dict, str]:
     """Xác thực OTP vừa đăng ký — /auth/verify-otp trả access_token luôn
-    (kiêm đăng nhập lần đầu), rồi gọi tiếp /users/me như login thường."""
+    (kiêm đăng nhập lần đầu), rồi gọi tiếp /users/me như login thường.
+
+    Trả về (profile, access_token) — access_token nhúng vào session cookie
+    của web để các route proxy sau (hồ sơ, bài tập...) dùng lại được, xem
+    `core/security.py::create_session_token`."""
     async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
         verify_resp = await client.post(
             "/auth/verify-otp", json={"email": email, "otp_code": otp_code}
@@ -52,7 +56,7 @@ async def verify_otp_and_fetch_profile(email: str, otp_code: str) -> dict:
         )
         if me_resp.status_code != 200:
             raise PostureXAuthError(502, "Xác thực thành công nhưng không lấy được hồ sơ.")
-        return me_resp.json()
+        return me_resp.json(), access_token
 
 
 async def resend_otp(email: str) -> str:
@@ -63,12 +67,15 @@ async def resend_otp(email: str) -> str:
         return resp.json().get("message", "Đã gửi lại mã OTP.")
 
 
-async def login_and_fetch_profile(email: str, password: str) -> dict:
+async def login_and_fetch_profile(email: str, password: str) -> tuple[dict, str]:
     """Đăng nhập bằng /auth/login rồi lấy thông tin qua /users/me.
 
     Hai lời gọi tuần tự vì /auth/login chỉ trả về access_token, không kèm
     tên/email/sđt (xem backend/app/schemas/auth.py::TokenResponse của repo
     app) — đúng thiết kế hiện tại của backend app, không phải thiếu sót.
+
+    Trả về (profile, access_token) — xem docstring của
+    `verify_otp_and_fetch_profile` cho lý do access_token được trả ra.
     """
     async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
         login_resp = await client.post(
@@ -88,7 +95,56 @@ async def login_and_fetch_profile(email: str, password: str) -> dict:
             # rõ ràng thay vì để KeyError mơ hồ nếu backend app đổi hành vi.
             raise PostureXAuthError(502, "Đăng nhập thành công nhưng không lấy được hồ sơ.")
 
-        return me_resp.json()
+        return me_resp.json(), access_token
+
+
+async def get_profile(access_token: str) -> dict:
+    """Proxy GET /users/me/profile — hồ sơ thể chất (tuổi/chiều cao/cân
+    nặng/giới tính/trình độ/mục tiêu tuần) dùng cho trang Hồ sơ và Home."""
+    async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
+        resp = await client.get(
+            "/users/me/profile", headers={"Authorization": f"Bearer {access_token}"}
+        )
+        if resp.status_code != 200:
+            raise PostureXAuthError(resp.status_code, _extract_detail(resp))
+        return resp.json()
+
+
+async def update_profile(access_token: str, data: dict) -> dict:
+    """Proxy PUT /users/me/profile — lưu hồ sơ thể chất."""
+    async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
+        resp = await client.put(
+            "/users/me/profile",
+            json=data,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if resp.status_code != 200:
+            raise PostureXAuthError(resp.status_code, _extract_detail(resp))
+        return resp.json()
+
+
+async def update_account(access_token: str, data: dict) -> dict:
+    """Proxy PATCH /users/me — đổi tên hiển thị/mật khẩu."""
+    async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
+        resp = await client.patch(
+            "/users/me",
+            json=data,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if resp.status_code != 200:
+            raise PostureXAuthError(resp.status_code, _extract_detail(resp))
+        return resp.json()
+
+
+async def list_exercises() -> list[dict]:
+    """Proxy GET /exercises — endpoint công khai phía backend app (không cần
+    token), nhưng vẫn đi qua web để trình duyệt không cần gọi thẳng sang
+    domain backend app (tránh phải mở CORS riêng cho domain web)."""
+    async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
+        resp = await client.get("/exercises")
+        if resp.status_code != 200:
+            raise PostureXAuthError(resp.status_code, "Không tải được danh sách bài tập.")
+        return resp.json()
 
 
 def _extract_detail(response: httpx.Response) -> str:

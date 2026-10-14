@@ -11,14 +11,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #0B0C0D; --surface: #1A1B1D; --border: #2C2D30;
-    --primary: #FF6F4F; --on-primary: #FFFFFF;
-    --text-primary: #F5F5F5; --text-secondary: #9A9A9E;
+    --bg: #0B0C0D; --surface: #1A1B1D; --surface-elevated: #222325; --border: #2C2D30;
+    --primary: #FF6F4F; --primary-muted: #402920; --on-primary: #FFFFFF;
+    --text-primary: #F5F5F5; --text-secondary: #9A9A9E; --text-tertiary: #5C5D60;
+    --danger: #FF6B6B; --danger-muted: #3A1F1F;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0; min-height: 100vh; background: var(--bg); color: var(--text-primary);
-    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
   }
   a { color: inherit; text-decoration: none; }
   header.top-bar {
@@ -37,19 +38,61 @@
   header.top-bar .home-link:hover { color: var(--text-primary); }
   main.center-wrap {
     min-height: calc(100vh - 73px);
-    display: flex; align-items: center; justify-content: center; padding: 24px;
+    display: flex; align-items: flex-start; justify-content: center; padding: 40px 24px;
   }
   .card {
-    width: 100%; max-width: 420px; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 20px; padding: 40px 32px;
-    text-align: center;
+    width: 100%; max-width: 480px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 20px; padding: 36px 32px;
   }
-  h1 { font-family: "Inter", sans-serif; font-size: 1.3rem; margin: 0 0 12px; }
-  p { color: var(--text-secondary); line-height: 1.6; margin: 0 0 24px; }
-  .cta {
-    display: inline-block; background: var(--primary); color: var(--on-primary);
-    padding: 12px 28px; border-radius: 999px; font-weight: 700; font-size: 0.92rem;
+  .step-label {
+    text-align: center; color: var(--text-tertiary); font-size: 0.78rem;
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
   }
+  .progress-bar {
+    height: 4px; background: var(--border); border-radius: 999px; margin-bottom: 24px; overflow: hidden;
+  }
+  .progress-bar .fill { height: 100%; background: var(--primary); transition: width 0.25s ease; }
+  h1 { font-family: "Inter", sans-serif; font-size: 1.4rem; font-weight: 800; margin: 0 0 6px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 24px; line-height: 1.5; }
+  label { display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px; margin-top: 16px; }
+  label:first-of-type { margin-top: 0; }
+  input, select {
+    width: 100%; background: var(--surface-elevated); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; color: var(--text-primary);
+    font-size: 0.95rem; font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--primary); }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .chip {
+    background: var(--surface-elevated); border: 1px solid var(--border); color: var(--text-secondary);
+    border-radius: 999px; padding: 8px 16px; font-size: 0.86rem; font-family: inherit;
+    cursor: pointer; transition: all 0.12s ease;
+  }
+  .chip:hover { border-color: var(--text-secondary); }
+  .chip.selected { background: var(--primary-muted); border-color: var(--primary); color: var(--text-primary); }
+  .btn-row { display: flex; gap: 12px; margin-top: 28px; }
+  button {
+    font-family: inherit; font-size: 0.95rem; font-weight: 700; border-radius: 999px;
+    padding: 13px; cursor: pointer; border: none; transition: opacity 0.15s ease;
+  }
+  button.submit { flex: 1; background: var(--primary); color: var(--on-primary); }
+  button.submit:hover { opacity: 0.92; }
+  button.submit:disabled { opacity: 0.5; cursor: default; }
+  button.ghost { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+  button.ghost:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+  .link-btn {
+    background: none; border: none; color: var(--primary); font-weight: 600; font-size: 0.86rem;
+    padding: 0; margin-top: 14px; cursor: pointer; display: block; text-align: center; width: 100%;
+  }
+  .error {
+    display: none; background: var(--danger-muted); color: var(--danger);
+    border-radius: 10px; padding: 10px 14px; font-size: 0.86rem; margin-top: 18px;
+  }
+  .hint { text-align: center; color: var(--text-tertiary); font-size: 0.82rem; margin-top: 22px; line-height: 1.6; }
+  .step { display: none; }
+  .step.active { display: block; }
+  fieldset { border: none; margin: 0; padding: 0; }
 </style>
 </head>
 <body>
@@ -64,16 +107,365 @@
 
 <main class="center-wrap">
 <div class="card">
-  <h1>Đăng ký trên web đang tạm khoá</h1>
-  <p>
-    Đội ngũ PostureX đang hoàn thiện lại bước xác thực để đảm bảo an toàn
-    tài khoản. Trong lúc này, vui lòng đăng ký trực tiếp trên app PostureX
-    (Google Play / App Store) — tài khoản đó dùng đăng nhập được luôn trên
-    web khi tính năng này mở lại.
-  </p>
-  <a href="login.html" class="cta">Đăng nhập</a>
+  <div class="step-label" id="step-label">Bước 1/4</div>
+  <div class="progress-bar"><div class="fill" id="progress-fill" style="width:25%"></div></div>
+
+  <!-- Bước 1: email/mật khẩu/họ tên -->
+  <section class="step active" id="step-1">
+    <h1>Tạo tài khoản</h1>
+    <p class="subtitle">Tài khoản này dùng đăng nhập được luôn trên app PostureX.</p>
+    <form id="form-1">
+      <label for="full-name">Họ tên</label>
+      <input type="text" id="full-name" required />
+      <label for="email">Email</label>
+      <input type="email" id="email" required />
+      <label for="password">Mật khẩu</label>
+      <input type="password" id="password" minlength="6" required />
+      <label for="password-confirm">Nhập lại mật khẩu</label>
+      <input type="password" id="password-confirm" minlength="6" required />
+      <div class="error" id="error-1"></div>
+      <div class="btn-row">
+        <button type="submit" class="submit" id="submit-1">Tiếp tục</button>
+      </div>
+    </form>
+    <p class="hint">Đã có tài khoản? <a href="login.html" style="color:var(--primary); font-weight:600;">Đăng nhập</a></p>
+  </section>
+
+  <!-- Bước 2: OTP -->
+  <section class="step" id="step-2">
+    <h1>Xác thực email</h1>
+    <p class="subtitle">Nhập mã 6 số vừa gửi tới email của bạn.</p>
+    <form id="form-2">
+      <label for="otp-code">Mã xác thực</label>
+      <input type="text" id="otp-code" inputmode="numeric" maxlength="6" required />
+      <div class="error" id="error-2"></div>
+      <div class="btn-row">
+        <button type="submit" class="submit" id="submit-2">Xác nhận</button>
+      </div>
+    </form>
+    <button class="link-btn" id="resend-otp">Gửi lại mã</button>
+  </section>
+
+  <!-- Bước 3: thông tin thể chất -->
+  <section class="step" id="step-3">
+    <h1>Thông tin cơ thể</h1>
+    <p class="subtitle">Giúp PostureX cá nhân hoá lịch tập cho bạn.</p>
+    <form id="form-3">
+      <label>Giới tính</label>
+      <div class="chip-group" id="chips-gender"></div>
+
+      <div class="row-2">
+        <div>
+          <label for="age">Tuổi</label>
+          <input type="number" id="age" min="14" max="90" required />
+        </div>
+        <div>
+          <label for="weekly-goal">Buổi tập/tuần</label>
+          <input type="number" id="weekly-goal" min="1" max="7" required />
+        </div>
+      </div>
+      <div class="row-2">
+        <div>
+          <label for="height">Chiều cao (cm)</label>
+          <input type="number" id="height" min="140" max="220" required />
+        </div>
+        <div>
+          <label for="weight">Cân nặng (kg)</label>
+          <input type="number" id="weight" min="35" max="180" required />
+        </div>
+      </div>
+
+      <label>Trình độ tập luyện</label>
+      <div class="chip-group" id="chips-fitness-level"></div>
+
+      <div class="error" id="error-3"></div>
+      <div class="btn-row">
+        <button type="submit" class="submit" id="submit-3">Tiếp tục</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Bước 4: mục tiêu & lịch tập -->
+  <section class="step" id="step-4">
+    <h1>Mục tiêu tập luyện</h1>
+    <p class="subtitle">Chọn càng chi tiết, lịch tập sinh ra càng sát với bạn.</p>
+    <form id="form-4">
+      <label>Ngày tập trong tuần</label>
+      <div class="chip-group" id="chips-workout-days"></div>
+
+      <label>Nhóm cơ trọng tâm</label>
+      <div class="chip-group" id="chips-focus-areas"></div>
+
+      <label>Thiết bị sẵn có</label>
+      <div class="chip-group" id="chips-equipment"></div>
+
+      <label>Mục tiêu</label>
+      <div class="chip-group" id="chips-goals"></div>
+
+      <label>Vấn đề sức khoẻ (nếu có)</label>
+      <div class="chip-group" id="chips-health-issues"></div>
+
+      <div class="error" id="error-4"></div>
+      <div class="btn-row">
+        <button type="submit" class="submit" id="submit-4">Hoàn tất</button>
+      </div>
+    </form>
+  </section>
 </div>
 </main>
+
+<script src="assets/js/onboarding-options.js"></script>
+<script src="assets/js/workout-plan.js"></script>
+<script>
+  // Trạng thái tích luỹ qua 4 bước — chỉ gửi lên server ở đúng bước cần.
+  const state = {
+    email: "",
+    fullName: "",
+    gender: null,
+    age: null,
+    heightCm: null,
+    weightKg: null,
+    fitnessLevel: null,
+    weeklyGoal: null,
+    workoutDays: new Set(),
+    focusAreas: new Set(),
+    equipment: new Set(),
+    goals: new Set(),
+    healthIssues: new Set(),
+  };
+
+  const STEPS = ["step-1", "step-2", "step-3", "step-4"];
+
+  function goToStep(index) {
+    STEPS.forEach((id, i) => {
+      document.getElementById(id).classList.toggle("active", i === index);
+    });
+    document.getElementById("step-label").textContent = `Bước ${index + 1}/4`;
+    document.getElementById("progress-fill").style.width = `${((index + 1) / 4) * 100}%`;
+  }
+
+  function showError(stepErrorId, message) {
+    const box = document.getElementById(stepErrorId);
+    box.textContent = message;
+    box.style.display = "block";
+  }
+
+  function hideError(stepErrorId) {
+    document.getElementById(stepErrorId).style.display = "none";
+  }
+
+  function setSubmitting(btnId, isSubmitting, label) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = isSubmitting;
+    if (isSubmitting) btn.dataset.originalText = btn.textContent;
+    btn.textContent = isSubmitting ? "Đang xử lý..." : (label || btn.dataset.originalText || btn.textContent);
+  }
+
+  // --- Chip multi/single-select dùng chung ---
+  function renderSingleSelectChips(containerId, options, onSelect) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip";
+      btn.textContent = opt;
+      btn.addEventListener("click", () => {
+        [...container.children].forEach((c) => c.classList.remove("selected"));
+        btn.classList.add("selected");
+        onSelect(opt);
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  function renderMultiSelectChips(containerId, options, selectedSet) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip" + (selectedSet.has(opt) ? " selected" : "");
+      btn.textContent = opt;
+      btn.addEventListener("click", () => {
+        if (selectedSet.has(opt)) {
+          selectedSet.delete(opt);
+          btn.classList.remove("selected");
+        } else {
+          selectedSet.add(opt);
+          btn.classList.add("selected");
+        }
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  renderSingleSelectChips("chips-gender", ["Male", "Female", "Other"], (v) => (state.gender = v));
+  renderSingleSelectChips(
+    "chips-fitness-level",
+    ["Beginner", "Intermediate", "Advanced"],
+    (v) => (state.fitnessLevel = v)
+  );
+  renderMultiSelectChips("chips-workout-days", WEEKDAY_LABELS, state.workoutDays);
+  renderMultiSelectChips("chips-focus-areas", OnboardingOptions.focusAreas, state.focusAreas);
+  renderMultiSelectChips("chips-equipment", OnboardingOptions.equipment, state.equipment);
+  renderMultiSelectChips("chips-goals", OnboardingOptions.goals, state.goals);
+  renderMultiSelectChips("chips-health-issues", OnboardingOptions.healthIssues, state.healthIssues);
+
+  // --- Bước 1 ---
+  document.getElementById("form-1").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hideError("error-1");
+
+    const fullName = document.getElementById("full-name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const confirm = document.getElementById("password-confirm").value;
+
+    if (password !== confirm) {
+      showError("error-1", "Mật khẩu nhập lại không khớp.");
+      return;
+    }
+
+    setSubmitting("submit-1", true);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, full_name: fullName }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Đăng ký thất bại.");
+
+      state.email = email;
+      state.fullName = fullName;
+      goToStep(1);
+    } catch (err) {
+      showError("error-1", err.message);
+    } finally {
+      setSubmitting("submit-1", false, "Tiếp tục");
+    }
+  });
+
+  // --- Bước 2: OTP ---
+  document.getElementById("form-2").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hideError("error-2");
+    const otpCode = document.getElementById("otp-code").value.trim();
+
+    setSubmitting("submit-2", true);
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: state.email, otp_code: otpCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Mã xác thực không đúng.");
+
+      goToStep(2);
+    } catch (err) {
+      showError("error-2", err.message);
+    } finally {
+      setSubmitting("submit-2", false, "Xác nhận");
+    }
+  });
+
+  document.getElementById("resend-otp").addEventListener("click", async () => {
+    hideError("error-2");
+    try {
+      const res = await fetch("/api/auth/resend-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: state.email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Không gửi lại được mã.");
+    } catch (err) {
+      showError("error-2", err.message);
+    }
+  });
+
+  // --- Bước 3: thông tin thể chất ---
+  document.getElementById("form-3").addEventListener("submit", (e) => {
+    e.preventDefault();
+    hideError("error-3");
+
+    if (!state.gender) return showError("error-3", "Vui lòng chọn giới tính.");
+    if (!state.fitnessLevel) return showError("error-3", "Vui lòng chọn trình độ.");
+
+    state.age = Number(document.getElementById("age").value);
+    state.heightCm = Number(document.getElementById("height").value);
+    state.weightKg = Number(document.getElementById("weight").value);
+    state.weeklyGoal = Number(document.getElementById("weekly-goal").value);
+
+    goToStep(3);
+  });
+
+  // --- Bước 4: mục tiêu & lịch tập ---
+  document.getElementById("form-4").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hideError("error-4");
+    setSubmitting("submit-4", true);
+
+    try {
+      const profileRes = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          age: state.age,
+          gender: state.gender,
+          height_cm: state.heightCm,
+          weight_kg: state.weightKg,
+          fitness_level: state.fitnessLevel,
+          weekly_goal: state.weeklyGoal,
+        }),
+      });
+      if (!profileRes.ok) {
+        const data = await profileRes.json();
+        throw new Error(data.detail || "Không lưu được hồ sơ.");
+      }
+
+      const exercisesRes = await fetch("/api/exercises", { credentials: "include" });
+      const serverExercises = exercisesRes.ok
+        ? (await exercisesRes.json()).map((e) => ({
+            name: e.name,
+            muscleGroups: e.muscle_groups || [],
+            difficulty: e.difficulty,
+            supportsAnalysis: e.supports_analysis,
+          }))
+        : [];
+
+      const plan = generateWorkoutPlan({
+        workoutDays: state.workoutDays,
+        weeklyGoal: state.weeklyGoal,
+        focusAreas: state.focusAreas,
+        fitnessLevel: state.fitnessLevel,
+        equipment: state.equipment,
+        goals: state.goals,
+        healthIssues: state.healthIssues,
+        serverExercises,
+      });
+
+      // Chỉ sống trong tab này — đăng nhập lại ở phiên khác sẽ không còn
+      // (đúng quyết định đã thống nhất, xem CLAUDE.md/plan của tính năng này).
+      sessionStorage.setItem(
+        "posturex_plan",
+        JSON.stringify({
+          startDate: plan.startDate.toISOString(),
+          days: plan.days.map((d) => ({ ...d, date: d.date.toISOString() })),
+        })
+      );
+
+      window.location.href = "home.html";
+    } catch (err) {
+      showError("error-4", err.message);
+      setSubmitting("submit-4", false, "Hoàn tất");
+    }
+  });
+</script>
 
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tài khoản — PostureX</title>
+<title>Hồ sơ — PostureX</title>
 <meta name="robots" content="noindex" />
 <link rel="icon" href="favicon-256.png" type="image/png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -11,9 +11,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #0B0C0D; --surface: #1A1B1D; --border: #2C2D30;
-    --primary: #FF6F4F; --on-primary: #FFFFFF;
-    --text-primary: #F5F5F5; --text-secondary: #9A9A9E;
+    --bg: #0B0C0D; --surface: #1A1B1D; --surface-elevated: #222325; --border: #2C2D30;
+    --primary: #FF6F4F; --primary-muted: #402920; --on-primary: #FFFFFF;
+    --text-primary: #F5F5F5; --text-secondary: #9A9A9E; --text-tertiary: #5C5D60;
+    --danger: #FF6B6B; --danger-muted: #3A1F1F; --success: #4ADE80; --success-muted: #16331F;
   }
   * { box-sizing: border-box; }
   body {
@@ -35,71 +36,187 @@
   }
   header.top-bar .home-link { font-size: 0.86rem; color: var(--text-secondary); }
   header.top-bar .home-link:hover { color: var(--text-primary); }
-  main.center-wrap {
-    min-height: calc(100vh - 73px);
-    display: flex; align-items: center; justify-content: center; padding: 24px;
-  }
+  main.wrap { max-width: 560px; margin: 0 auto; padding: 40px 24px 80px; }
   .card {
-    width: 100%; max-width: 420px; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 20px; padding: 36px 32px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 32px; margin-bottom: 20px;
   }
-  h1 { font-family: "Inter", sans-serif; font-size: 1.4rem; margin: 0 0 24px; }
-  .row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
-  .row:last-of-type { border-bottom: none; }
-  .row .k { color: var(--text-secondary); }
-  .row .v { font-weight: 600; }
-  button {
-    width: 100%; margin-top: 26px; background: transparent; color: var(--text-secondary);
+  h1 { font-family: "Inter", sans-serif; font-size: 1.4rem; margin: 0 0 4px; }
+  h2 { font-family: "Inter", sans-serif; font-size: 1.05rem; margin: 0 0 16px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 24px; }
+  label { display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px; margin-top: 16px; }
+  label:first-of-type { margin-top: 0; }
+  input, select {
+    width: 100%; background: var(--surface-elevated); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; color: var(--text-primary);
+    font-size: 0.95rem; font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--primary); }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .chip {
+    background: var(--surface-elevated); border: 1px solid var(--border); color: var(--text-secondary);
+    border-radius: 999px; padding: 8px 16px; font-size: 0.86rem; font-family: inherit;
+    cursor: pointer; transition: all 0.12s ease;
+  }
+  .chip.selected { background: var(--primary-muted); border-color: var(--primary); color: var(--text-primary); }
+  button.submit {
+    width: 100%; margin-top: 24px; background: var(--primary); color: var(--on-primary);
+    border: none; border-radius: 999px; padding: 13px; font-size: 0.95rem; font-weight: 700;
+    font-family: inherit; cursor: pointer;
+  }
+  button.submit:disabled { opacity: 0.5; cursor: default; }
+  button.logout {
+    width: 100%; margin-top: 8px; background: transparent; color: var(--text-secondary);
     border: 1px solid var(--border); border-radius: 999px; padding: 12px;
     font-family: inherit; font-size: 0.92rem; cursor: pointer;
   }
-  button:hover { border-color: var(--primary); color: var(--text-primary); }
+  button.logout:hover { border-color: var(--primary); color: var(--text-primary); }
+  .error {
+    display: none; background: var(--danger-muted); color: var(--danger);
+    border-radius: 10px; padding: 10px 14px; font-size: 0.86rem; margin-top: 18px;
+  }
+  .success {
+    display: none; background: var(--success-muted); color: var(--success);
+    border-radius: 10px; padding: 10px 14px; font-size: 0.86rem; margin-top: 18px;
+  }
   #loading, #guest { text-align: center; color: var(--text-secondary); }
   #guest a { color: var(--primary); font-weight: 600; }
+  .hint-small { color: var(--text-tertiary); font-size: 0.78rem; margin-top: 4px; }
 </style>
 </head>
 <body>
 
 <header class="top-bar">
-  <a href="index.html" class="brand">
+  <a href="home.html" class="brand">
     <img src="assets/images/logo-icon.png" width="24" height="24" alt="" style="border-radius:6px;" />
     PostureX
   </a>
-  <a href="index.html" class="home-link">← Trang chủ</a>
+  <a href="home.html" class="home-link">← Trang chủ</a>
 </header>
 
-<main class="center-wrap">
-<div class="card">
-  <div id="loading">Đang tải thông tin tài khoản...</div>
-
-  <div id="content" style="display:none;">
-    <h1>Tài khoản của bạn</h1>
-    <div class="row"><span class="k">Tên</span><span class="v" id="f-name">—</span></div>
-    <div class="row"><span class="k">Email</span><span class="v" id="f-email">—</span></div>
-    <div class="row"><span class="k">Số điện thoại</span><span class="v" id="f-phone">—</span></div>
-    <button id="logout-btn">Đăng xuất</button>
-  </div>
+<main class="wrap">
+  <div id="loading">Đang tải hồ sơ...</div>
 
   <div id="guest" style="display:none;">
-    Bạn chưa đăng nhập. <a href="login.html" style="color:var(--primary); font-weight:600;">Đăng nhập ngay</a>
+    Bạn chưa đăng nhập. <a href="login.html">Đăng nhập ngay</a>
   </div>
-</div>
+
+  <div id="content" style="display:none;">
+    <h1>Hồ sơ của bạn</h1>
+    <p class="subtitle">Xem và cập nhật thông tin cá nhân.</p>
+
+    <!-- Tài khoản: tên, email, mật khẩu -->
+    <div class="card">
+      <h2>Tài khoản</h2>
+      <form id="form-account">
+        <label for="full-name">Họ tên</label>
+        <input type="text" id="full-name" />
+        <label for="email">Email</label>
+        <input type="email" id="email" disabled style="opacity:0.6;" />
+        <label for="new-password">Mật khẩu mới (để trống nếu không đổi)</label>
+        <input type="password" id="new-password" minlength="6" />
+        <div class="error" id="error-account"></div>
+        <div class="success" id="success-account"></div>
+        <button type="submit" class="submit" id="submit-account">Lưu thay đổi</button>
+      </form>
+    </div>
+
+    <!-- Hồ sơ thể chất -->
+    <div class="card">
+      <h2>Thông tin cơ thể</h2>
+      <form id="form-profile">
+        <label>Giới tính</label>
+        <div class="chip-group" id="chips-gender"></div>
+
+        <div class="row-2">
+          <div>
+            <label for="age">Tuổi</label>
+            <input type="number" id="age" min="1" max="120" />
+          </div>
+          <div>
+            <label for="weekly-goal">Buổi tập/tuần</label>
+            <input type="number" id="weekly-goal" min="1" max="7" />
+          </div>
+        </div>
+        <div class="row-2">
+          <div>
+            <label for="height">Chiều cao (cm)</label>
+            <input type="number" id="height" min="140" max="220" />
+          </div>
+          <div>
+            <label for="weight">Cân nặng (kg)</label>
+            <input type="number" id="weight" min="35" max="180" />
+          </div>
+        </div>
+
+        <label>Trình độ tập luyện</label>
+        <div class="chip-group" id="chips-fitness-level"></div>
+
+        <p class="hint-small">Ngày tập/nhóm cơ trọng tâm/thiết bị/mục tiêu chỉ áp dụng cho lịch tập của phiên đăng ký — sửa ở đây không tạo lại lịch.</p>
+
+        <div class="error" id="error-profile"></div>
+        <div class="success" id="success-profile"></div>
+        <button type="submit" class="submit" id="submit-profile">Lưu thay đổi</button>
+      </form>
+    </div>
+
+    <button class="logout" id="logout-btn">Đăng xuất</button>
+  </div>
 </main>
 
 <script>
+  let currentFullName = "";
+  let selectedGender = null;
+  let selectedFitnessLevel = null;
+
+  function renderSingleSelectChips(containerId, options, selected, onSelect) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip" + (opt === selected ? " selected" : "");
+      btn.textContent = opt;
+      btn.addEventListener("click", () => {
+        [...container.children].forEach((c) => c.classList.remove("selected"));
+        btn.classList.add("selected");
+        onSelect(opt);
+      });
+      container.appendChild(btn);
+    });
+  }
+
   (async () => {
     const loading = document.getElementById("loading");
-    const content = document.getElementById("content");
     const guest = document.getElementById("guest");
+    const content = document.getElementById("content");
 
     try {
-      const res = await fetch("/api/auth/me", { credentials: "include" });
-      if (!res.ok) throw new Error("not logged in");
-      const data = await res.json();
+      const meRes = await fetch("/api/auth/me", { credentials: "include" });
+      if (!meRes.ok) throw new Error("not logged in");
+      const me = await meRes.json();
+      currentFullName = me.full_name || "";
+      document.getElementById("full-name").value = currentFullName;
+      document.getElementById("email").value = me.email;
 
-      document.getElementById("f-name").textContent = data.full_name || "(chưa cập nhật)";
-      document.getElementById("f-email").textContent = data.email;
-      document.getElementById("f-phone").textContent = data.phone_number || "(chưa cập nhật)";
+      const profileRes = await fetch("/api/profile", { credentials: "include" });
+      const profile = profileRes.ok ? await profileRes.json() : {};
+
+      selectedGender = profile.gender || null;
+      selectedFitnessLevel = profile.fitness_level || null;
+      renderSingleSelectChips("chips-gender", ["Male", "Female", "Other"], selectedGender, (v) => (selectedGender = v));
+      renderSingleSelectChips(
+        "chips-fitness-level",
+        ["Beginner", "Intermediate", "Advanced"],
+        selectedFitnessLevel,
+        (v) => (selectedFitnessLevel = v)
+      );
+
+      if (profile.age != null) document.getElementById("age").value = profile.age;
+      if (profile.weekly_goal != null) document.getElementById("weekly-goal").value = profile.weekly_goal;
+      if (profile.height_cm != null) document.getElementById("height").value = profile.height_cm;
+      if (profile.weight_kg != null) document.getElementById("weight").value = profile.weight_kg;
 
       loading.style.display = "none";
       content.style.display = "block";
@@ -109,7 +226,96 @@
     }
   })();
 
+  // --- Form tài khoản (tên/mật khẩu) — chỉ gửi phần đã đổi ---
+  document.getElementById("form-account").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById("error-account");
+    const successBox = document.getElementById("success-account");
+    errorBox.style.display = "none";
+    successBox.style.display = "none";
+
+    const fullName = document.getElementById("full-name").value.trim();
+    const newPassword = document.getElementById("new-password").value;
+
+    const payload = {};
+    if (fullName !== currentFullName) payload.full_name = fullName;
+    if (newPassword) payload.password = newPassword;
+
+    if (Object.keys(payload).length === 0) {
+      successBox.textContent = "Không có thay đổi nào để lưu.";
+      successBox.style.display = "block";
+      return;
+    }
+
+    const btn = document.getElementById("submit-account");
+    btn.disabled = true;
+    try {
+      const res = await fetch("/api/account", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Không lưu được.");
+
+      currentFullName = data.full_name || fullName;
+      document.getElementById("new-password").value = "";
+      successBox.textContent = "Đã lưu thay đổi.";
+      successBox.style.display = "block";
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.style.display = "block";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // --- Form hồ sơ thể chất — chỉ gửi phần đã điền ---
+  document.getElementById("form-profile").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById("error-profile");
+    const successBox = document.getElementById("success-profile");
+    errorBox.style.display = "none";
+    successBox.style.display = "none";
+
+    const payload = {};
+    const age = document.getElementById("age").value;
+    const weeklyGoal = document.getElementById("weekly-goal").value;
+    const height = document.getElementById("height").value;
+    const weight = document.getElementById("weight").value;
+
+    if (age) payload.age = Number(age);
+    if (weeklyGoal) payload.weekly_goal = Number(weeklyGoal);
+    if (height) payload.height_cm = Number(height);
+    if (weight) payload.weight_kg = Number(weight);
+    if (selectedGender) payload.gender = selectedGender;
+    if (selectedFitnessLevel) payload.fitness_level = selectedFitnessLevel;
+
+    const btn = document.getElementById("submit-profile");
+    btn.disabled = true;
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Không lưu được.");
+
+      successBox.textContent = "Đã lưu thay đổi.";
+      successBox.style.display = "block";
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.style.display = "block";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
   document.getElementById("logout-btn")?.addEventListener("click", async () => {
+    sessionStorage.removeItem("posturex_plan");
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     window.location.href = "login.html";
   });

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trang chủ — PostureX</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="favicon-256.png" type="image/png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0B0C0D; --surface: #1A1B1D; --surface-elevated: #222325; --border: #2C2D30;
+    --primary: #FF6F4F; --primary-muted: #402920; --on-primary: #FFFFFF;
+    --text-primary: #F5F5F5; --text-secondary: #9A9A9E; --text-tertiary: #5C5D60;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text-primary);
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+  }
+  a { color: inherit; text-decoration: none; }
+  header.top-bar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px;
+    background: rgba(11, 12, 13, 0.82);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  header.top-bar .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: "Inter", sans-serif; font-weight: 800; font-size: 1.05rem;
+  }
+  nav.top-links { display: flex; align-items: center; gap: 20px; }
+  nav.top-links a { font-size: 0.86rem; color: var(--text-secondary); }
+  nav.top-links a:hover { color: var(--text-primary); }
+  nav.top-links button {
+    background: none; border: 1px solid var(--border); color: var(--text-secondary);
+    border-radius: 999px; padding: 7px 16px; font-family: inherit; font-size: 0.82rem; cursor: pointer;
+  }
+  nav.top-links button:hover { border-color: var(--primary); color: var(--text-primary); }
+  main.wrap { max-width: 920px; margin: 0 auto; padding: 36px 24px 80px; }
+  h1 { font-family: "Inter", sans-serif; font-size: 1.5rem; margin: 0 0 4px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 28px; }
+  .calendar-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 28px;
+  }
+  .weekday-label {
+    text-align: center; color: var(--text-tertiary); font-size: 0.74rem;
+    text-transform: uppercase; letter-spacing: 0.04em; padding-bottom: 4px;
+  }
+  .day-cell {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 10px 8px; min-height: 68px; cursor: pointer; transition: border-color 0.12s ease;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .day-cell:hover { border-color: var(--text-secondary); }
+  .day-cell.selected { border-color: var(--primary); background: var(--primary-muted); }
+  .day-cell.rest { opacity: 0.55; }
+  .day-cell.today { box-shadow: inset 0 0 0 1px var(--primary); }
+  .day-cell .day-num { font-family: "Inter", sans-serif; font-weight: 700; font-size: 0.86rem; }
+  .day-cell .session-name {
+    font-size: 0.7rem; color: var(--text-secondary); line-height: 1.3;
+    overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  #day-detail {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+  }
+  #day-detail h2 { font-family: "Inter", sans-serif; font-size: 1.1rem; margin: 0 0 4px; }
+  #day-detail .detail-date { color: var(--text-secondary); font-size: 0.86rem; margin-bottom: 16px; }
+  .exercise-row {
+    display: flex; justify-content: space-between; padding: 10px 0;
+    border-bottom: 1px solid var(--border); font-size: 0.9rem;
+  }
+  .exercise-row:last-child { border-bottom: none; }
+  .exercise-row .sets-reps { color: var(--text-secondary); }
+  #loading, #error-box { text-align: center; color: var(--text-secondary); padding: 60px 20px; }
+  .error-text { color: #FF6B6B; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+  <a href="home.html" class="brand">
+    <img src="assets/images/logo-icon.png" width="24" height="24" alt="" style="border-radius:6px;" />
+    PostureX
+  </a>
+  <nav class="top-links">
+    <a href="account.html">Hồ sơ</a>
+    <button id="logout-btn">Đăng xuất</button>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div id="loading">Đang tải lịch tập...</div>
+  <div id="error-box" style="display:none;"></div>
+
+  <div id="content" style="display:none;">
+    <h1 id="greeting">Xin chào</h1>
+    <p class="subtitle">Lịch tập 4 tuần của bạn — bấm vào một ngày để xem chi tiết.</p>
+
+    <div class="calendar-grid" id="weekday-header"></div>
+    <div class="calendar-grid" id="calendar-grid"></div>
+
+    <div id="day-detail"></div>
+  </div>
+</main>
+
+<script src="assets/js/onboarding-options.js"></script>
+<script src="assets/js/workout-plan.js"></script>
+<script>
+  let plan = null;
+
+  function formatDateShort(date) {
+    return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+  }
+
+  function isSameDate(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  function renderWeekdayHeader() {
+    const container = document.getElementById("weekday-header");
+    container.innerHTML = WEEKDAY_LABELS.map((l) => `<div class="weekday-label">${l}</div>`).join("");
+  }
+
+  function renderCalendar() {
+    const container = document.getElementById("calendar-grid");
+    const today = new Date();
+    container.innerHTML = plan.days
+      .map((day, i) => {
+        const date = new Date(day.date);
+        const classes = ["day-cell"];
+        if (day.exercises.length === 0) classes.push("rest");
+        if (isSameDate(date, today)) classes.push("today");
+        return `
+          <div class="${classes.join(" ")}" data-index="${i}">
+            <span class="day-num">${formatDateShort(date)}</span>
+            <span class="session-name">${day.sessionName}</span>
+          </div>
+        `;
+      })
+      .join("");
+
+    [...container.children].forEach((cell) => {
+      cell.addEventListener("click", () => selectDay(Number(cell.dataset.index)));
+    });
+  }
+
+  function selectDay(index) {
+    const container = document.getElementById("calendar-grid");
+    [...container.children].forEach((c, i) => c.classList.toggle("selected", i === index));
+
+    const day = plan.days[index];
+    const date = new Date(day.date);
+    const detail = document.getElementById("day-detail");
+
+    if (day.exercises.length === 0) {
+      detail.innerHTML = `
+        <h2>Ngày nghỉ</h2>
+        <div class="detail-date">${date.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "numeric" })}</div>
+        <p style="color:var(--text-secondary); margin:0;">Không có buổi tập nào hôm nay — nghỉ ngơi và hồi phục.</p>
+      `;
+      return;
+    }
+
+    detail.innerHTML = `
+      <h2>${day.sessionName}</h2>
+      <div class="detail-date">${date.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "numeric" })}</div>
+      ${day.exercises
+        .map((ex) => `<div class="exercise-row"><span>${ex.name}</span><span class="sets-reps">${ex.setsReps}</span></div>`)
+        .join("")}
+    `;
+  }
+
+  function reviveDates(stored) {
+    return {
+      startDate: new Date(stored.startDate),
+      days: stored.days.map((d) => ({ ...d, date: new Date(d.date) })),
+    };
+  }
+
+  (async () => {
+    const loading = document.getElementById("loading");
+    const errorBox = document.getElementById("error-box");
+    const content = document.getElementById("content");
+
+    try {
+      const meRes = await fetch("/api/auth/me", { credentials: "include" });
+      if (!meRes.ok) {
+        window.location.href = "login.html";
+        return;
+      }
+      const me = await meRes.json();
+      document.getElementById("greeting").textContent = `Xin chào, ${me.full_name || me.email}`;
+
+      // Vừa đăng ký xong trong CHÍNH tab này — dùng luôn lịch đã sinh kèm
+      // đầy đủ ngày tập/nhóm cơ/thiết bị/mục tiêu đã chọn.
+      const stored = sessionStorage.getItem("posturex_plan");
+      if (stored) {
+        plan = reviveDates(JSON.parse(stored));
+      } else {
+        // Đăng nhập bình thường — chỉ còn 5 trường có lưu ở backend, các
+        // trường còn lại (ngày tập/nhóm cơ/thiết bị/mục tiêu/vấn đề sức
+        // khoẻ) dùng mặc định, đúng hành vi applyAuthSession() của app.
+        const [profileRes, exercisesRes] = await Promise.all([
+          fetch("/api/profile", { credentials: "include" }),
+          fetch("/api/exercises", { credentials: "include" }),
+        ]);
+        const profile = profileRes.ok ? await profileRes.json() : {};
+        const serverExercises = exercisesRes.ok
+          ? (await exercisesRes.json()).map((e) => ({
+              name: e.name,
+              muscleGroups: e.muscle_groups || [],
+              difficulty: e.difficulty,
+              supportsAnalysis: e.supports_analysis,
+            }))
+          : [];
+
+        plan = generateWorkoutPlan({
+          workoutDays: new Set(),
+          weeklyGoal: profile.weekly_goal || 4,
+          focusAreas: new Set(),
+          fitnessLevel: profile.fitness_level || "Regular",
+          serverExercises,
+        });
+      }
+
+      renderWeekdayHeader();
+      renderCalendar();
+      loading.style.display = "none";
+      content.style.display = "block";
+    } catch (err) {
+      loading.style.display = "none";
+      errorBox.innerHTML = `<p class="error-text">Không tải được lịch tập. Vui lòng tải lại trang.</p>`;
+      errorBox.style.display = "block";
+    }
+  })();
+
+  document.getElementById("logout-btn").addEventListener("click", async () => {
+    sessionStorage.removeItem("posturex_plan");
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    window.location.href = "login.html";
+  });
+</script>
+
+</body>
+</html>

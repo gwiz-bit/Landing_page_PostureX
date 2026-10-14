@@ -166,7 +166,7 @@
     <button type="submit" class="submit" id="submit-btn">Đăng nhập</button>
   </form>
 
-  <p class="hint">Chưa có tài khoản? Vui lòng đăng ký trên app PostureX (Google Play / App Store).</p>
+  <p class="hint">Chưa có tài khoản? <a href="register.html" style="color:var(--primary); font-weight:600;">Đăng ký ngay</a></p>
 </div>
 </main>
 
@@ -197,7 +197,7 @@
         throw new Error(data.detail || "Đăng nhập thất bại.");
       }
 
-      window.location.href = "account.html";
+      window.location.href = "home.html";
     } catch (err) {
       errorBox.textContent = err.message;
       errorBox.style.display = "block";

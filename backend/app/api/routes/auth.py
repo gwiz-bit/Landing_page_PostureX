@@ -38,13 +38,14 @@ def _require_registration_enabled() -> None:
         raise HTTPException(status_code=503, detail=_REGISTRATION_DISABLED_MESSAGE)
 
 
-def _set_session_cookie(response: Response, profile: dict) -> None:
+def _set_session_cookie(response: Response, profile: dict, backend_access_token: str) -> None:
     token = create_session_token(
         user_id=profile["id"],
         email=profile["email"],
         full_name=profile.get("full_name"),
         phone_number=profile.get("phone_number"),
         is_admin=profile.get("is_admin", False),
+        backend_access_token=backend_access_token,
     )
     response.set_cookie(
         key=settings.SESSION_COOKIE_NAME,
@@ -78,10 +79,10 @@ async def verify_otp(
 ) -> UserProfileOut:
     _require_registration_enabled()
     try:
-        profile = await verify_otp_and_fetch_profile(data.email, data.otp_code)
+        profile, access_token = await verify_otp_and_fetch_profile(data.email, data.otp_code)
     except PostureXAuthError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
-    _set_session_cookie(response, profile)
+    _set_session_cookie(response, profile, access_token)
     return UserProfileOut(**profile)
 
 
@@ -100,11 +101,11 @@ async def resend_otp_endpoint(request: FastAPIRequest, data: ResendOtpRequest) -
 @limiter.limit("10/minute;100/hour")
 async def login(request: FastAPIRequest, data: LoginRequest, response: Response) -> UserProfileOut:
     try:
-        profile = await login_and_fetch_profile(data.email, data.password)
+        profile, access_token = await login_and_fetch_profile(data.email, data.password)
     except PostureXAuthError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
-    _set_session_cookie(response, profile)
+    _set_session_cookie(response, profile, access_token)
     return UserProfileOut(**profile)
 
 
@@ -131,6 +132,20 @@ async def me(request: FastAPIRequest) -> UserProfileOut:
     )
 
 
+def require_login(request: FastAPIRequest) -> dict:
+    """Dependency dùng cho mọi route cần đăng nhập nhưng không cần quyền
+    admin (hồ sơ, danh sách bài tập...). Trả về payload JWT đầy đủ — các
+    route gọi tiếp backend app đọc `payload["backend_access_token"]` ra để
+    forward (xem `routes/profile.py`)."""
+    token = request.cookies.get(settings.SESSION_COOKIE_NAME)
+    if not token:
+        raise HTTPException(status_code=401, detail="Chưa đăng nhập.")
+    payload = decode_session_token(token)
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Phiên đăng nhập đã hết hạn.")
+    return payload
+
+
 def require_admin(request: FastAPIRequest) -> dict:
     """Dependency dùng cho mọi route chỉ admin được gọi (vd xem waitlist).
 
@@ -139,12 +154,7 @@ def require_admin(request: FastAPIRequest) -> dict:
     (`_set_session_cookie`). Ném 401 nếu chưa đăng nhập/token hết hạn, 403
     nếu đăng nhập nhưng không phải admin — hai mã khác nhau để trang admin
     phân biệt được "cần đăng nhập lại" với "không có quyền"."""
-    token = request.cookies.get(settings.SESSION_COOKIE_NAME)
-    if not token:
-        raise HTTPException(status_code=401, detail="Chưa đăng nhập.")
-    payload = decode_session_token(token)
-    if payload is None:
-        raise HTTPException(status_code=401, detail="Phiên đăng nhập đã hết hạn.")
+    payload = require_login(request)
     if not payload.get("is_admin", False):
         raise HTTPException(status_code=403, detail="Chỉ tài khoản admin được truy cập.")
     return payload

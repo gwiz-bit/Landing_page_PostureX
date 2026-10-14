@@ -2,8 +2,14 @@
 
 Sau khi backend app xác thực đúng email/mật khẩu, web tự phát hành một JWT
 riêng (ký bằng SECRET_KEY của web) để lưu trong cookie HttpOnly của trình
-duyệt. Token JWT gốc từ backend app không được lưu lại lâu dài — chỉ dùng
-đúng 1 lần lúc đăng nhập để gọi /users/me lấy thông tin hiển thị.
+duyệt.
+
+Token JWT gốc (`access_token`) của backend app ĐƯỢC nhúng vào payload này
+(xem `backend_access_token`) để các route proxy sau (hồ sơ, danh sách bài
+tập...) dùng lại được mà không cần đăng nhập lại — JS phía trình duyệt
+không đọc được vì cookie là HttpOnly và payload được ký riêng.
+`SESSION_EXPIRE_MINUTES` cố ý khớp `ACCESS_TOKEN_EXPIRE_MINUTES` của backend
+app (7 ngày) để hai token luôn hết hạn cùng lúc.
 """
 
 from datetime import datetime, timedelta, timezone
@@ -22,6 +28,7 @@ def create_session_token(
     full_name: str | None,
     phone_number: str | None = None,
     is_admin: bool = False,
+    backend_access_token: str | None = None,
 ) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.SESSION_EXPIRE_MINUTES)
     payload: dict[str, Any] = {
@@ -30,6 +37,7 @@ def create_session_token(
         "full_name": full_name,
         "phone_number": phone_number,
         "is_admin": is_admin,
+        "backend_access_token": backend_access_token,
         "exp": expire,
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=ALGORITHM)
