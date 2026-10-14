@@ -463,7 +463,9 @@
         })
       );
 
-      window.location.href = "home.html";
+      // KHÔNG đưa thẳng vào trang lịch tập nữa — lịch đã lưu vào localStorage
+      // phía trên, người dùng tự vào xem qua Hồ sơ → "Xem lịch tập" khi muốn.
+      window.location.href = "index.html";
     } catch (err) {
       showError("error-4", err.message);
       setSubmitting("submit-4", false, "Hoàn tất");

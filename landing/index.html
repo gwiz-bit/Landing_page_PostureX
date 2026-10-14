@@ -655,7 +655,7 @@
       <a href="#mission">Vì sao PostureX</a>
       <a href="#download">Tải ứng dụng</a>
       <a href="#contact">Hỗ trợ</a>
-      <a href="login.html">Đăng nhập</a>
+      <a href="login.html" id="auth-nav-link">Đăng nhập</a>
     </nav>
     <a href="/download/posturex-latest.apk" class="nav-cta" download>Tải app</a>
     <button class="menu-toggle" id="menu-toggle" aria-label="Mở menu" aria-expanded="false" aria-controls="nav-links">
@@ -1007,6 +1007,26 @@
     }, { rootMargin: "-40% 0px -50% 0px" });
     sections.forEach((s) => navObserver.observe(s));
   }
+
+  // Trang landing công khai nhưng vẫn cần biết đã đăng nhập chưa — nếu
+  // không, link "Đăng nhập" hiện ra kể cả khi đang có phiên hợp lệ, khiến
+  // người dùng tưởng nhầm là bị đăng xuất khi quay lại trang này.
+  (async () => {
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "include" });
+      if (!res.ok) return;
+      const link = document.getElementById("auth-nav-link");
+      if (!link) return;
+      link.href = "account.html";
+      link.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="vertical-align:-3px; margin-right:4px;">
+          <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8" />
+          <path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>Hồ sơ`;
+    } catch {
+      // Không đăng nhập hoặc backend chưa chạy — giữ nguyên link "Đăng nhập".
+    }
+  })();
 </script>
 
 </body>
