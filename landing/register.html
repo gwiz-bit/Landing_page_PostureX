@@ -466,6 +466,16 @@
           email: state.email,
           startDate: plan.startDate.toISOString(),
           days: plan.days.map((d) => ({ ...d, date: d.date.toISOString() })),
+          // Lưu thêm các lựa chọn GỐC (không chỉ kết quả) — để trang Hồ sơ
+          // sinh lại đúng lịch này khi người dùng sau đó đổi "Buổi tập/tuần"
+          // hay "Trình độ", thay vì lịch cũ bị lạc hậu mãi mãi.
+          criteria: {
+            workoutDays: [...state.workoutDays],
+            focusAreas: [...state.focusAreas],
+            equipment: [...state.equipment],
+            goals: [...state.goals],
+            healthIssues: [...state.healthIssues],
+          },
         })
       );
 

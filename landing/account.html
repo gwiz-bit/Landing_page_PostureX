@@ -232,6 +232,8 @@
   </div>
 </main>
 
+<script src="assets/js/onboarding-options.js"></script>
+<script src="assets/js/workout-plan.js"></script>
 <script>
   // Định nghĩa 6 trường thông tin cơ thể — nguồn duy nhất cho cả phần xem
   // lẫn phần sửa, tránh lặp code cho từng trường.
@@ -361,10 +363,55 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Không lưu được.");
       renderBodyInfo(data);
+      await regenerateCachedPlanIfNeeded(data);
     } catch (err) {
       errorBox.textContent = err.message;
       errorBox.style.display = "block";
     }
+  }
+
+  // Lịch tập đã sinh lúc đăng ký (localStorage, xem register.html) lưu
+  // sẵn kết quả cuối + "criteria" gốc. "Buổi tập/tuần"/"Trình độ" đổi ở
+  // đây thì sinh lại lịch đó NGAY, giữ nguyên ngày tập/nhóm cơ/thiết bị/
+  // mục tiêu/vấn đề sức khoẻ đã chọn ban đầu — nếu không, lịch cũ sẽ lạc
+  // hậu mãi mãi vì workout-plan.html chỉ đọc cache có sẵn, không tự so
+  // sánh với hồ sơ mới nhất.
+  async function regenerateCachedPlanIfNeeded(profile) {
+    const stored = localStorage.getItem("posturex_plan");
+    if (!stored) return;
+    const cached = JSON.parse(stored);
+    if (cached.email !== currentEmail || !cached.criteria) return;
+
+    const exercisesRes = await fetch("/api/exercises", { credentials: "include" });
+    const serverExercises = exercisesRes.ok
+      ? (await exercisesRes.json()).map((e) => ({
+          name: e.name,
+          muscleGroups: e.muscle_groups || [],
+          difficulty: e.difficulty,
+          supportsAnalysis: e.supports_analysis,
+        }))
+      : [];
+
+    const plan = generateWorkoutPlan({
+      workoutDays: new Set(cached.criteria.workoutDays),
+      weeklyGoal: profile.weekly_goal ?? 4,
+      focusAreas: new Set(cached.criteria.focusAreas),
+      fitnessLevel: profile.fitness_level ?? "Regular",
+      equipment: new Set(cached.criteria.equipment),
+      goals: new Set(cached.criteria.goals),
+      healthIssues: new Set(cached.criteria.healthIssues),
+      serverExercises,
+    });
+
+    localStorage.setItem(
+      "posturex_plan",
+      JSON.stringify({
+        email: cached.email,
+        startDate: plan.startDate.toISOString(),
+        days: plan.days.map((d) => ({ ...d, date: d.date.toISOString() })),
+        criteria: cached.criteria,
+      })
+    );
   }
 
   // --- "+ Thêm thông tin còn thiếu" — gom các trường chưa có vào 1 form ---
@@ -409,6 +456,7 @@
       if (!res.ok) throw new Error(data.detail || "Không lưu được.");
       panel.classList.remove("active");
       renderBodyInfo(data);
+      await regenerateCachedPlanIfNeeded(data);
     } catch (err) {
       errorBox.textContent = err.message;
       errorBox.style.display = "block";
