@@ -79,6 +79,41 @@
   .exercise-row .sets-reps { color: var(--text-secondary); }
   #loading, #error-box { text-align: center; color: var(--text-secondary); padding: 60px 20px; }
   .error-text { color: #FF6B6B; }
+
+  .detail-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .icon-btn {
+    background: var(--surface-elevated); border: 1px solid var(--border); color: var(--text-secondary);
+    width: 34px; height: 34px; border-radius: 10px; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-family: inherit;
+  }
+  .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+  #day-detail input {
+    width: 100%; background: var(--surface-elevated); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px; color: var(--text-primary);
+    font-size: 0.9rem; font-family: inherit;
+  }
+  #day-detail input:focus { outline: none; border-color: var(--primary); }
+  #day-detail label { display: block; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px; }
+  .exercise-edit-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+  .exercise-edit-row input:first-child { flex: 3; }
+  .exercise-edit-row input:nth-child(2) { flex: 2; }
+  .remove-exercise-btn {
+    background: none; border: none; color: var(--text-secondary); cursor: pointer;
+    font-size: 1.1rem; width: 32px; height: 32px; flex-shrink: 0;
+  }
+  .remove-exercise-btn:hover { color: #FF6B6B; }
+  .add-exercise-link {
+    background: none; border: none; color: var(--primary); font-size: 0.86rem; font-weight: 600;
+    cursor: pointer; font-family: inherit; padding: 0; margin-bottom: 16px;
+  }
+  .detail-edit-actions { display: flex; gap: 10px; }
+  .detail-edit-actions button {
+    flex: 1; border-radius: 999px; padding: 11px; font-family: inherit; font-size: 0.9rem;
+    font-weight: 700; cursor: pointer; border: none;
+  }
+  .btn-save { background: var(--primary); color: var(--on-primary); }
+  .btn-cancel { background: transparent; border: 1px solid var(--border) !important; color: var(--text-secondary); }
+  .detail-error { color: #FF6B6B; font-size: 0.84rem; margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -113,6 +148,7 @@
 <script src="assets/js/workout-plan.js"></script>
 <script>
   let plan = null;
+  let currentEmail = null;
 
   function formatDateShort(date) {
     return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
@@ -139,7 +175,7 @@
         return `
           <div class="${classes.join(" ")}" data-index="${i}">
             <span class="day-num">${formatDateShort(date)}</span>
-            <span class="session-name">${day.sessionName}</span>
+            <span class="session-name">${escapeHtml(day.sessionName)}</span>
           </div>
         `;
       })
@@ -150,30 +186,166 @@
     });
   }
 
+  let selectedIndex = null;
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function escapeAttr(s) {
+    return escapeHtml(s).replace(/`/g, "&#96;");
+  }
+
+  function dateLabel(date) {
+    return date.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "numeric" });
+  }
+
   function selectDay(index) {
+    selectedIndex = index;
     const container = document.getElementById("calendar-grid");
     [...container.children].forEach((c, i) => c.classList.toggle("selected", i === index));
+    renderDayDetail(index);
+  }
 
+  function renderDayDetail(index) {
     const day = plan.days[index];
     const date = new Date(day.date);
     const detail = document.getElementById("day-detail");
 
     if (day.exercises.length === 0) {
       detail.innerHTML = `
-        <h2>Ngày nghỉ</h2>
-        <div class="detail-date">${date.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "numeric" })}</div>
+        <div class="detail-header">
+          <div>
+            <h2>Ngày nghỉ</h2>
+            <div class="detail-date">${dateLabel(date)}</div>
+          </div>
+          <button class="icon-btn" id="edit-day-btn" title="Sửa">✏️</button>
+        </div>
         <p style="color:var(--text-secondary); margin:0;">Không có buổi tập nào hôm nay — nghỉ ngơi và hồi phục.</p>
       `;
-      return;
+    } else {
+      detail.innerHTML = `
+        <div class="detail-header">
+          <div>
+            <h2>${escapeHtml(day.sessionName)}</h2>
+            <div class="detail-date">${dateLabel(date)}</div>
+          </div>
+          <button class="icon-btn" id="edit-day-btn" title="Sửa">✏️</button>
+        </div>
+        ${day.exercises
+          .map((ex) => `<div class="exercise-row"><span>${escapeHtml(ex.name)}</span><span class="sets-reps">${escapeHtml(ex.setsReps)}</span></div>`)
+          .join("")}
+      `;
+    }
+    document.getElementById("edit-day-btn").addEventListener("click", () => renderDayEditor(index));
+  }
+
+  // Giống hệt cơ chế sửa ngày trên app (lib/widgets/plan_calendar.dart,
+  // _DayDetailSheet): đổi tên buổi tập + thêm/bớt/sửa từng bài tập tại chỗ.
+  function renderDayEditor(index) {
+    const day = plan.days[index];
+    const date = new Date(day.date);
+    const detail = document.getElementById("day-detail");
+    const drafts = day.exercises.map((ex) => ({ name: ex.name, setsReps: ex.setsReps }));
+
+    function renderExerciseRows() {
+      return drafts
+        .map(
+          (ex, i) => `
+        <div class="exercise-edit-row">
+          <input type="text" placeholder="Tên bài tập" value="${escapeAttr(ex.name)}" data-ex-name="${i}" />
+          <input type="text" placeholder="Sets × reps" value="${escapeAttr(ex.setsReps)}" data-ex-setsreps="${i}" />
+          <button class="remove-exercise-btn" data-remove="${i}" title="Xoá">✕</button>
+        </div>
+      `
+        )
+        .join("");
+    }
+
+    function rerenderRows() {
+      document.getElementById("exercise-edit-rows").innerHTML = renderExerciseRows();
+      wireRowEvents();
+    }
+
+    function wireRowEvents() {
+      document.querySelectorAll("[data-ex-name]").forEach((input) => {
+        input.addEventListener("input", (e) => (drafts[Number(e.target.dataset.exName)].name = e.target.value));
+      });
+      document.querySelectorAll("[data-ex-setsreps]").forEach((input) => {
+        input.addEventListener("input", (e) => (drafts[Number(e.target.dataset.exSetsreps)].setsReps = e.target.value));
+      });
+      document.querySelectorAll("[data-remove]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          drafts.splice(Number(btn.dataset.remove), 1);
+          rerenderRows();
+        });
+      });
     }
 
     detail.innerHTML = `
-      <h2>${day.sessionName}</h2>
-      <div class="detail-date">${date.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "numeric" })}</div>
-      ${day.exercises
-        .map((ex) => `<div class="exercise-row"><span>${ex.name}</span><span class="sets-reps">${ex.setsReps}</span></div>`)
-        .join("")}
+      <div class="detail-date" style="margin-bottom:12px;">${dateLabel(date)}</div>
+      <label for="edit-session-name">Tên buổi tập</label>
+      <input type="text" id="edit-session-name" value="${escapeAttr(day.exercises.length === 0 ? "" : day.sessionName)}" placeholder="vd Full Body Strength" style="margin-bottom:16px;" />
+      <div id="exercise-edit-rows">${renderExerciseRows()}</div>
+      <button class="add-exercise-link" id="add-exercise-btn">+ Thêm bài tập</button>
+      <div class="detail-error" id="day-edit-error" style="display:none;"></div>
+      <div class="detail-edit-actions">
+        <button class="btn-cancel" id="cancel-day-edit">Huỷ</button>
+        <button class="btn-save" id="save-day-edit">Lưu</button>
+      </div>
     `;
+
+    wireRowEvents();
+    document.getElementById("add-exercise-btn").addEventListener("click", () => {
+      drafts.push({ name: "", setsReps: "3 × 10" });
+      rerenderRows();
+    });
+    document.getElementById("cancel-day-edit").addEventListener("click", () => renderDayDetail(index));
+    document.getElementById("save-day-edit").addEventListener("click", () => {
+      const sessionNameInput = document.getElementById("edit-session-name").value.trim();
+      const errorBox = document.getElementById("day-edit-error");
+      const cleanExercises = drafts
+        .filter((d) => d.name.trim() !== "")
+        .map((d) => ({ name: d.name.trim(), setsReps: d.setsReps.trim() || "3 × 10" }));
+
+      if (cleanExercises.length > 0 && !sessionNameInput) {
+        errorBox.textContent = "Vui lòng đặt tên cho buổi tập.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      plan.days[index] = {
+        date: day.date,
+        sessionName: cleanExercises.length === 0 ? "Rest" : sessionNameInput,
+        exercises: cleanExercises,
+      };
+      persistPlan();
+      renderCalendar();
+      selectDay(index);
+    });
+  }
+
+  // Lưu lại toàn bộ plan hiện tại vào localStorage — kể cả khi phiên này
+  // chưa từng có cache (đăng nhập bình thường, không qua đăng ký trên máy
+  // này), vì sau khi sửa tay 1 ngày thì CẦN một nơi để giữ lại thay đổi đó,
+  // giống TokenStorage.saveAiPlanDays() của app.
+  function persistPlan() {
+    const existingRaw = localStorage.getItem("posturex_plan");
+    const existing = existingRaw ? JSON.parse(existingRaw) : null;
+    const criteria =
+      existing && existing.email === currentEmail && existing.criteria
+        ? existing.criteria
+        : { workoutDays: [], focusAreas: [], equipment: [], goals: [], healthIssues: [] };
+
+    localStorage.setItem(
+      "posturex_plan",
+      JSON.stringify({
+        email: currentEmail,
+        startDate: plan.startDate.toISOString(),
+        days: plan.days.map((d) => ({ ...d, date: d.date.toISOString() })),
+        criteria,
+      })
+    );
   }
 
   function reviveDates(stored) {
@@ -195,6 +367,7 @@
         return;
       }
       const me = await meRes.json();
+      currentEmail = me.email;
       document.getElementById("greeting").textContent = `Xin chào, ${me.full_name || me.email}`;
 
       // localStorage lưu trên CẢ THIẾT BỊ (không phải riêng 1 tab) — khớp
