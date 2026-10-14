@@ -218,7 +218,7 @@
     <div class="card">
       <h2>Lịch tập</h2>
       <p class="subtitle" style="margin-bottom:16px;">Xem lịch tập 4 tuần đã sinh cho bạn.</p>
-      <a href="home.html" class="submit">Xem lịch tập</a>
+      <a href="workout-plan.html" class="submit">Xem lịch tập</a>
     </div>
 
     <!-- Quản trị — chỉ hiện với tài khoản is_admin=True -->
@@ -549,7 +549,7 @@
   })();
 
   document.getElementById("logout-btn")?.addEventListener("click", async () => {
-    // Cố tình KHÔNG xoá "posturex_plan" — xem ghi chú tương tự trong home.html.
+    // Cố tình KHÔNG xoá "posturex_plan" — xem ghi chú tương tự trong workout-plan.html.
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     window.location.href = "login.html";
   });
