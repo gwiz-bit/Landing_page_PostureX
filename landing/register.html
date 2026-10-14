@@ -62,7 +62,13 @@
     font-size: 0.95rem; font-family: inherit;
   }
   input:focus, select:focus { outline: none; border-color: var(--primary); }
-  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  /* Nhãn bên trong mỗi ô của .row-2 luôn là con đầu tiên của div bọc nó —
+     label:first-of-type (hay :first-child) đều khớp CẢ HAI nhãn trong hàng,
+     không chỉ nhãn đầu tiên thật sự của form, làm mất khoảng cách phía
+     trên. Thay vì dựa vào thứ tự, để .row-2 tự giữ khoảng cách và luôn bỏ
+     margin-top của nhãn bên trong nó. */
+  .row-2 label { margin-top: 0; }
   .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
   .chip {
     background: var(--surface-elevated); border: 1px solid var(--border); color: var(--text-secondary);
