@@ -147,31 +147,6 @@ async def list_exercises() -> list[dict]:
         return resp.json()
 
 
-async def request_password_reset(email: str) -> str:
-    """Proxy POST /auth/forgot-password — gửi mã đặt lại mật khẩu qua email.
-
-    Backend app LUÔN trả cùng 1 thông báo chung chung (chống user
-    enumeration) kể cả khi email không tồn tại — không raise lỗi riêng ở
-    đây để giữ đúng hành vi đó."""
-    async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
-        resp = await client.post("/auth/forgot-password", json={"email": email})
-        if resp.status_code != 200:
-            raise PostureXAuthError(resp.status_code, _extract_detail(resp))
-        return resp.json().get("message", "Đã gửi mã xác thực.")
-
-
-async def confirm_password_reset(token: str, new_password: str) -> str:
-    """Proxy POST /auth/reset-password — xác nhận mã + đặt mật khẩu mới."""
-    async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
-        resp = await client.post(
-            "/auth/reset-password",
-            json={"token": token, "new_password": new_password, "confirm_password": new_password},
-        )
-        if resp.status_code != 200:
-            raise PostureXAuthError(resp.status_code, _extract_detail(resp))
-        return resp.json().get("message", "Đã đổi mật khẩu.")
-
-
 def _extract_detail(response: httpx.Response) -> str:
     try:
         return response.json().get("detail", "Đăng nhập thất bại.")
