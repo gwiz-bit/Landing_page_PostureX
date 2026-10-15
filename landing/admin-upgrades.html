@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Đơn nâng cấp — PostureX</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="favicon-256.png" type="image/png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0B0C0D; --surface: #1A1B1D; --surface-elevated: #222325; --border: #2C2D30;
+    --primary: #FF6F4F; --on-primary: #FFFFFF;
+    --text-primary: #F5F5F5; --text-secondary: #9A9A9E; --text-tertiary: #5C5D60;
+    --danger: #FF6B6B; --danger-muted: #3A1F1F;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text-primary);
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+  }
+  a { color: inherit; text-decoration: none; }
+  header.top-bar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px;
+    background: rgba(11, 12, 13, 0.82);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  header.top-bar .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: "Inter", sans-serif; font-weight: 800; font-size: 1.05rem;
+  }
+  header.top-bar .home-link { font-size: 0.86rem; color: var(--text-secondary); }
+  header.top-bar .home-link:hover { color: var(--text-primary); }
+  .lang-toggle {
+    display: flex; align-items: center; gap: 2px; background: var(--surface-elevated);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px; margin-left: 14px;
+  }
+  .lang-toggle button {
+    background: none; border: none; color: var(--text-secondary); font-family: inherit;
+    font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--primary); color: var(--on-primary); }
+  .admin-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+  .admin-tabs a {
+    padding: 8px 18px; border-radius: 999px; font-size: 0.86rem; font-weight: 600;
+    color: var(--text-secondary); border: 1px solid var(--border); background: var(--surface-elevated);
+  }
+  .admin-tabs a:hover { color: var(--text-primary); }
+  .admin-tabs a.active { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+  main.wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-family: "Inter", sans-serif; font-size: 1.5rem; margin: 0 0 6px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 28px; }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  .count-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface-elevated); border: 1px solid var(--border);
+    border-radius: 999px; padding: 6px 14px; font-size: 0.86rem; color: var(--text-secondary);
+  }
+  .count-badge b { color: var(--text-primary); font-family: "Inter", sans-serif; }
+  button.export {
+    background: var(--surface-elevated); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 999px; padding: 9px 18px;
+    font-family: inherit; font-size: 0.86rem; cursor: pointer;
+  }
+  button.export:hover { border-color: var(--primary); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  thead th {
+    text-align: left; padding: 14px 20px; color: var(--text-secondary);
+    font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface-elevated); }
+  .msg-cell { white-space: pre-wrap; word-break: break-word; max-width: 420px; line-height: 1.5; }
+  .source-tag {
+    display: inline-block; background: var(--surface-elevated); border: 1px solid var(--border);
+    border-radius: 999px; padding: 2px 10px; font-size: 0.78rem; color: var(--text-secondary);
+  }
+  #loading, #empty { text-align: center; color: var(--text-secondary); padding: 60px 20px; }
+  #denied {
+    display: none; text-align: center; padding: 60px 20px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  }
+  #denied p { color: var(--text-secondary); margin: 8px 0 0; }
+  #denied a { color: var(--primary); font-weight: 600; }
+  .error {
+    background: var(--danger-muted); color: var(--danger); border-radius: 10px;
+    padding: 10px 14px; font-size: 0.86rem; margin-bottom: 16px; display: none;
+  }
+  .badge { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: 0.76rem; font-weight: 700; }
+  .badge.pending { background: #3A2E14; color: #FBBF24; }
+  .badge.approved { background: #14301F; color: #4ADE80; }
+  .badge.rejected { background: var(--danger-muted); color: var(--danger); }
+  .row-actions { display: flex; gap: 8px; }
+  .row-actions button { border-radius: 999px; padding: 5px 12px; font-family: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface-elevated); color: var(--text-primary); }
+  .row-actions .ok { border-color: #4ADE80; color: #4ADE80; }
+  .row-actions .no:hover { border-color: var(--danger); color: var(--danger); }
+  .code-cell { font-family: ui-monospace, Consolas, monospace; font-size: 0.82rem; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+  <a href="index.html" class="brand">
+    <img src="assets/images/logo-icon.png" width="24" height="24" alt="" style="border-radius:6px;" />
+    PostureX
+  </a>
+  <div style="display:flex; align-items:center;">
+    <a href="index.html" class="home-link" data-i18n="nav.backHome">← Trang chủ</a>
+    <div class="lang-toggle">
+      <button type="button" data-lang-toggle="vi" onclick="setLang('vi')">VI</button>
+      <button type="button" data-lang-toggle="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="admin-tabs">
+    <a href="admin-waitlist.html" data-i18n="admin.tab.waitlist">Đăng ký tải trước</a>
+    <a href="admin-testers.html" data-i18n="admin.tab.testers">Tester</a>
+    <a href="admin-feedback.html" data-i18n="admin.tab.feedback">Góp ý</a>
+    <a href="admin-upgrades.html" class="active" data-i18n="admin.tab.upgrades">Đơn nâng cấp</a>
+  </nav>
+
+  <h1 data-i18n="admin.upgrades.title">Đơn nâng cấp gói</h1>
+  <p class="subtitle" data-i18n="admin.upgrades.subtitle">Người dùng báo đã chuyển khoản. Đối chiếu sao kê, kích hoạt gói trong app rồi bấm "Đã kích hoạt".</p>
+
+  <div class="error" id="error-box"></div>
+  <div id="loading" data-i18n="admin.loading">Đang tải danh sách...</div>
+
+  <div id="denied">
+    <h1 style="margin-bottom:4px;" data-i18n="admin.denied">Không có quyền truy cập</h1>
+    <p><span data-i18n="admin.deniedBody">Trang này chỉ dành cho tài khoản admin.</span> <a href="login.html" data-i18n="admin.loginAgain">Đăng nhập lại</a></p>
+  </div>
+
+  <div id="empty" style="display:none;" data-i18n="admin.upgrades.empty">Chưa có đơn nâng cấp nào.</div>
+
+  <div id="content" style="display:none;">
+    <div class="toolbar">
+      <span class="count-badge"><span data-i18n="admin.total">Tổng cộng</span> <b id="total-count">0</b></span>
+    </div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="admin.upgrades.colUser">Người dùng</th>
+            <th data-i18n="admin.upgrades.colPlan">Gói</th>
+            <th data-i18n="admin.upgrades.colAmount">Số tiền</th>
+            <th data-i18n="admin.upgrades.colCode">Mã chuyển khoản</th>
+            <th data-i18n="admin.colTime">Thời gian</th>
+            <th data-i18n="admin.upgrades.colStatus">Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/i18n.js"></script>
+<script>
+  let currentEntries = [];
+
+  function formatDate(iso) {
+    const d = new Date(iso + (iso.endsWith("Z") ? "" : "Z"));
+    return d.toLocaleString(getLocale(), { dateStyle: "short", timeStyle: "short" });
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[c]));
+  }
+
+  function statusCell(e) {
+    if (e.status !== "pending") {
+      return `<span class="badge ${escapeHtml(e.status)}">${t("admin.upgrades.status." + e.status)}</span>`;
+    }
+    return `<div class="row-actions">
+      <button class="ok" data-act="approved" data-id="${e.id}">${t("admin.upgrades.approve")}</button>
+      <button class="no" data-act="rejected" data-id="${e.id}">${t("admin.upgrades.reject")}</button>
+    </div>`;
+  }
+
+  function render(entries) {
+    currentEntries = entries;
+    document.getElementById("total-count").textContent = entries.length;
+    document.getElementById("rows").innerHTML = entries.map((e) => `
+      <tr>
+        <td>${escapeHtml(e.full_name || "")}<div style="color:var(--text-secondary);font-size:0.82rem;">${escapeHtml(e.email)}</div></td>
+        <td>${escapeHtml(e.plan)}</td>
+        <td>${Number(e.amount).toLocaleString("vi-VN")}đ</td>
+        <td class="code-cell">${escapeHtml(e.transfer_code)}</td>
+        <td>${formatDate(e.created_at)}</td>
+        <td>${statusCell(e)}</td>
+      </tr>
+    `).join("");
+  }
+
+  document.getElementById("rows").addEventListener("click", async (ev) => {
+    const btn = ev.target.closest("button[data-act]");
+    if (!btn) return;
+    const approve = btn.dataset.act === "approved";
+    if (!confirm(t(approve ? "admin.upgrades.confirmApprove" : "admin.upgrades.confirmReject"))) return;
+    btn.disabled = true;
+    try {
+      const res = await fetch(`/api/admin/upgrades/${btn.dataset.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status: btn.dataset.act }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : t("admin.upgrades.actionError"));
+      const i = currentEntries.findIndex((x) => x.id === data.id);
+      if (i >= 0) currentEntries[i] = data;
+      render(currentEntries);
+    } catch (err) {
+      alert(err.message || t("admin.upgrades.actionError"));
+      btn.disabled = false;
+    }
+  });
+
+  (async () => {
+    const loading = document.getElementById("loading");
+    const denied = document.getElementById("denied");
+    const empty = document.getElementById("empty");
+    const content = document.getElementById("content");
+    const errorBox = document.getElementById("error-box");
+
+    try {
+      const res = await fetch("/api/admin/upgrades", { credentials: "include" });
+
+      if (res.status === 401) {
+        window.location.href = "login.html";
+        return;
+      }
+      if (res.status === 403) {
+        loading.style.display = "none";
+        denied.style.display = "block";
+        return;
+      }
+      if (!res.ok) throw new Error(t("admin.loadError"));
+
+      const data = await res.json();
+      loading.style.display = "none";
+
+      if (data.entries.length === 0) {
+        empty.style.display = "block";
+        return;
+      }
+
+      render(data.entries);
+      content.style.display = "block";
+    } catch (err) {
+      loading.style.display = "none";
+      errorBox.textContent = err.message;
+      errorBox.style.display = "block";
+    }
+  })();
+
+  document.addEventListener("posturex:langchange", () => {
+    if (currentEntries.length) render(currentEntries);
+  });
+</script>
+
+</body>
+</html>

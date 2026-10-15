@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nâng cấp gói — PostureX</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="favicon-256.png" type="image/png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0B0C0D; --surface: #1A1B1D; --surface-elevated: #222325; --border: #2C2D30;
+    --primary: #FF6F4F; --primary-muted: #402920; --on-primary: #FFFFFF;
+    --text-primary: #F5F5F5; --text-secondary: #9A9A9E; --text-tertiary: #5C5D60;
+    --danger: #FF6B6B; --danger-muted: #3A1F1F; --success: #4ADE80;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text-primary);
+    font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  }
+  a { color: inherit; text-decoration: none; }
+  header.top-bar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px;
+    background: rgba(11, 12, 13, 0.82);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  header.top-bar .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: "Inter", sans-serif; font-weight: 800; font-size: 1.05rem;
+  }
+  header.top-bar .home-link { font-size: 0.86rem; color: var(--text-secondary); }
+  header.top-bar .home-link:hover { color: var(--text-primary); }
+  .lang-toggle {
+    display: flex; align-items: center; gap: 2px; background: var(--surface-elevated);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px; margin-left: 14px;
+  }
+  .lang-toggle button {
+    background: none; border: none; color: var(--text-secondary); font-family: inherit;
+    font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--primary); color: var(--on-primary); }
+  main.wrap { max-width: 600px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-family: "Inter", sans-serif; font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 28px; line-height: 1.5; }
+
+  /* Thanh tiến độ 3 bước */
+  .stepper { display: flex; align-items: flex-start; margin-bottom: 28px; }
+  .stepper .s { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; text-align: center; }
+  .stepper .s::before {
+    content: ""; position: absolute; top: 15px; right: 50%; width: 100%; height: 2px; background: var(--border);
+  }
+  .stepper .s:first-child::before { display: none; }
+  .stepper .s.done::before, .stepper .s.active::before { background: var(--primary); }
+  .stepper .dot {
+    position: relative; z-index: 1; width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface-elevated); border: 2px solid var(--border);
+    font-size: 0.82rem; font-weight: 700; color: var(--text-tertiary);
+  }
+  .stepper .s.active .dot { border-color: var(--primary); color: var(--primary); background: var(--primary-muted); }
+  .stepper .s.done .dot { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+  .stepper .lbl { font-size: 0.74rem; color: var(--text-tertiary); max-width: 90px; line-height: 1.3; }
+  .stepper .s.active .lbl, .stepper .s.done .lbl { color: var(--text-primary); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px; }
+  @media (max-width: 520px) { .card { padding: 24px 18px; } }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  h2 { font-family: "Inter", sans-serif; font-size: 1.15rem; font-weight: 800; margin: 0 0 8px; }
+  .card p.body { color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0 0 20px; }
+
+  .warn {
+    background: #2A1D14; border: 1px solid var(--primary); border-radius: 14px;
+    padding: 16px 18px; margin-bottom: 22px;
+  }
+  .warn strong { display: block; color: var(--primary); font-size: 0.9rem; margin-bottom: 8px; }
+  .warn ul { margin: 0; padding-left: 20px; font-size: 0.88rem; line-height: 1.7; }
+  .warn .why { margin: 10px 0 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; }
+
+  input[type="email"] {
+    width: 100%; background: var(--surface-elevated); border: 1px solid var(--border);
+    border-radius: 12px; padding: 13px 16px; color: var(--text-primary);
+    font-size: 0.95rem; font-family: inherit; margin-bottom: 14px;
+  }
+  input[type="email"]:focus { outline: none; border-color: var(--primary); }
+  .btn {
+    display: block; width: 100%; text-align: center;
+    background: var(--primary); color: var(--on-primary); border: none; border-radius: 999px;
+    padding: 14px; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  .btn:hover { opacity: 0.92; }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); margin-top: 12px; }
+  .btn.ghost:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+  .msg { font-size: 0.86rem; margin-top: 14px; min-height: 1.2em; }
+  .msg.error { color: var(--danger); }
+  .msg.success { color: var(--success); }
+  .note { color: var(--text-tertiary); font-size: 0.8rem; line-height: 1.6; margin: 16px 0 0; }
+  .back-btn {
+    display: block; margin: 16px auto 0; background: none; border: none; color: var(--text-secondary);
+    font-family: inherit; font-size: 0.86rem; font-weight: 600; cursor: pointer;
+  }
+  .back-btn:hover { color: var(--text-primary); }
+
+  main.wrap { max-width: 860px; }
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 680px) { .plans { grid-template-columns: 1fr; } }
+  .plan {
+    position: relative; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px 28px; display: flex; flex-direction: column;
+  }
+  .plan.featured { border-color: var(--primary); }
+  .plan .badge {
+    position: absolute; top: -12px; left: 28px; background: var(--primary); color: var(--on-primary);
+    font-size: 0.72rem; font-weight: 700; padding: 4px 12px; border-radius: 999px;
+  }
+  .plan h2 { font-size: 1.3rem; margin: 0 0 14px; }
+  .price { font-family: "Inter", sans-serif; font-size: 2.2rem; font-weight: 800; }
+  .price small { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); }
+  .plan ul { list-style: none; padding: 0; margin: 22px 0 28px; flex: 1; }
+  .plan li { padding: 8px 0; font-size: 0.92rem; color: var(--text-primary); display: flex; gap: 10px; }
+  .plan li::before { content: "✓"; color: var(--primary); font-weight: 800; }
+  .plan .btn { display: block; text-align: center; background: var(--primary); color: var(--on-primary); border-radius: 999px; padding: 14px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.15s ease; }
+  .plan .btn:hover { opacity: 0.92; }
+  .plan:not(.featured) .btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+  .plans-note { text-align: center; color: var(--text-tertiary); font-size: 0.82rem; line-height: 1.6; margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+  <a href="index.html" class="brand">
+    <img src="assets/images/logo-icon.png" width="24" height="24" alt="" style="border-radius:6px;" />
+    PostureX
+  </a>
+  <div style="display:flex; align-items:center;">
+    <a href="index.html" class="home-link" data-i18n="nav.backHome">← Trang chủ</a>
+    <div class="lang-toggle">
+      <button type="button" data-lang-toggle="vi" onclick="setLang('vi')">VI</button>
+      <button type="button" data-lang-toggle="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="upgrade.page.title">Nâng cấp gói</h1>
+  <p class="subtitle" data-i18n="upgrade.page.subtitle">Chọn gói phù hợp để mở khoá đầy đủ tính năng PostureX.</p>
+
+  <div class="plans">
+    <div class="plan">
+      <h2>Premium</h2>
+      <div class="price">59.000đ<small data-i18n="upgrade.perMonth">/tháng</small></div>
+      <ul>
+        <li data-i18n="upgrade.premium.f1">Toàn bộ bài tập</li>
+        <li data-i18n="upgrade.premium.f2">Phản hồi bằng giọng nói</li>
+        <li data-i18n="upgrade.premium.f3">Lịch sử tập không giới hạn</li>
+      </ul>
+      <a class="btn" href="checkout.html?plan=premium" data-i18n="upgrade.buy">Mua gói này</a>
+    </div>
+    <div class="plan featured">
+      <span class="badge" data-i18n="upgrade.pro.badge">Đầy đủ nhất</span>
+      <h2>Pro</h2>
+      <div class="price">89.000đ<small data-i18n="upgrade.perMonth">/tháng</small></div>
+      <ul>
+        <li data-i18n="upgrade.pro.f1">Toàn bộ tính năng Premium</li>
+        <li data-i18n="upgrade.pro.f2">Chương trình cá nhân hoá bằng AI</li>
+        <li data-i18n="upgrade.pro.f3">Phân tích chuyên sâu</li>
+      </ul>
+      <a class="btn" href="checkout.html?plan=pro" data-i18n="upgrade.buy">Mua gói này</a>
+    </div>
+  </div>
+  <p class="plans-note" data-i18n="upgrade.note">Thanh toán bằng chuyển khoản ngân hàng. Gói được kích hoạt sau khi đội ngũ đối chiếu giao dịch.</p>
+</main>
+
+<script src="assets/js/i18n.js"></script>
+<script>
+  // Chưa đăng nhập thì chuyển sang trang đăng nhập khi bấm mua — trang thanh
+  // toán cần biết tài khoản nào được nâng cấp.
+  document.querySelectorAll(".plan .btn").forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const target = btn.getAttribute("href");
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        window.location.href = res.ok ? target : "login.html";
+      } catch {
+        window.location.href = "login.html";
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1258,21 +1258,17 @@
         </svg><span data-i18n="nav.profile">${t("nav.profile")}</span>`;
 
       // Menu thả xuống: rê chuột (máy tính) hoặc chạm (điện thoại, không có
-      // hover). Admin không thấy "Nâng cấp" mà thấy 2 trang quản trị.
+      // hover). Admin có thêm mục "Danh sách".
       const me = await res.json();
       const items = [
         `<a class="pd-item" href="account.html" data-i18n="menu.info">${t("menu.info")}</a>`,
         `<a class="pd-item" href="workout-plan.html" data-i18n="menu.plan">${t("menu.plan")}</a>`,
       ];
+      items.push(`<a class="pd-item" href="upgrade.html" data-i18n="menu.upgrade">${t("menu.upgrade")}</a>`);
       if (me.is_admin) {
-        // Một mục duy nhất — trang admin có tab chuyển giữa "Đăng ký tải trước" và "Góp ý".
+        // Một mục duy nhất — trang admin có tab chuyển giữa các danh sách.
         items.push(
           `<a class="pd-item" href="admin-waitlist.html" data-i18n="menu.list">${t("menu.list")}</a>`
-        );
-      } else {
-        // Chưa có trang mua gói Pro/Max — khi có thì đổi <span> này thành <a href="...">.
-        items.push(
-          `<span class="pd-item disabled"><span data-i18n="menu.upgrade">${t("menu.upgrade")}</span><span class="pd-badge" data-i18n="menu.comingSoon">${t("menu.comingSoon")}</span></span>`
         );
       }
       const wrap = document.createElement("div");

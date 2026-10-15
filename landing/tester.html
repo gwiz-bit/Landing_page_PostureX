@@ -103,11 +103,11 @@
   .msg.error { color: var(--danger); }
   .msg.success { color: var(--success); }
   .note { color: var(--text-tertiary); font-size: 0.8rem; line-height: 1.6; margin: 16px 0 0; }
-  .restart {
-    display: block; margin: 22px auto 0; background: none; border: none; color: var(--text-tertiary);
-    font-family: inherit; font-size: 0.82rem; cursor: pointer; text-decoration: underline;
+  .back-btn {
+    display: block; margin: 16px auto 0; background: none; border: none; color: var(--text-secondary);
+    font-family: inherit; font-size: 0.86rem; font-weight: 600; cursor: pointer;
   }
-  .restart:hover { color: var(--text-secondary); }
+  .back-btn:hover { color: var(--text-primary); }
 </style>
 </head>
 <body>
@@ -164,6 +164,7 @@
       <div class="msg success" id="sent-email" style="margin:0 0 18px;"></div>
       <a class="btn" id="open-test-link" target="_blank" rel="noopener" data-i18n="tester.step2.open">Mở trang đăng ký tester</a>
       <button type="button" class="btn ghost" id="confirm-joined" data-i18n="tester.step2.confirm">Tôi đã tham gia thử nghiệm</button>
+      <button type="button" class="back-btn" data-back data-i18n="tester.back">← Quay lại bước trước</button>
       <p class="note" data-i18n="tester.step2.note">Nếu trang báo bạn chưa có quyền, có thể email chưa được thêm vào danh sách — hãy chờ thêm rồi thử lại.</p>
     </section>
 
@@ -172,10 +173,10 @@
       <h2 data-i18n="tester.step3.title">Bước 3: Tải PostureX</h2>
       <p class="body" data-i18n="tester.step3.body">Mở Google Play để cài app. Nếu chưa thấy nút cài đặt, hãy chờ vài phút (đôi khi vài giờ) rồi thử lại.</p>
       <a class="btn" id="open-store-link" target="_blank" rel="noopener" data-i18n="tester.step3.open">Mở Google Play</a>
+      <button type="button" class="back-btn" data-back data-i18n="tester.back">← Quay lại bước trước</button>
       <p class="note" data-i18n="tester.step3.thanks">Cảm ơn bạn đã đồng hành cùng PostureX! Mọi góp ý đều rất quý giá với chúng tôi.</p>
     </section>
 
-    <button type="button" class="restart" id="restart" data-i18n="tester.restart">Làm lại từ đầu</button>
   </div>
 </main>
 
@@ -211,7 +212,8 @@
     [1, 2, 3].forEach((n) => {
       document.getElementById("panel-" + n).classList.toggle("active", n === state.step);
     });
-    document.getElementById("restart").style.display = state.step === 1 ? "none" : "block";
+    const emailInput = document.getElementById("tester-email");
+    if (state.step === 1 && state.email && !emailInput.value) emailInput.value = state.email;
     document.getElementById("sent-email").textContent = state.email ? t("tester.sentTo", { email: state.email }) : "";
   }
   document.addEventListener("posturex:langchange", render);
@@ -252,18 +254,21 @@
     }
   });
 
+  // Quay lại bước trước (từ bước 2 và 3) — giữ nguyên email đã gửi.
+  document.querySelectorAll("[data-back]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.step = Math.max(1, state.step - 1);
+      save();
+      render();
+    });
+  });
+
   document.getElementById("confirm-joined").addEventListener("click", () => {
     state.step = 3;
     save();
     render();
   });
 
-  document.getElementById("restart").addEventListener("click", () => {
-    state = { step: 1, email: "" };
-    save();
-    document.getElementById("tester-email").value = "";
-    render();
-  });
 
   document.addEventListener("DOMContentLoaded", render);
 </script>
