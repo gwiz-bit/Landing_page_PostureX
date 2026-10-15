@@ -12,14 +12,15 @@ Landing page cho app PostureX (đồ án EXE202, FPT). Mục tiêu chính: thu h
   - `account.html` — trang **Hồ sơ**: xem/sửa theo từng mục (icon ✏️ bật form sửa riêng cho từng trường, chỉ hiện trường đã có giá trị), đổi mật khẩu (chỉ cần mật khẩu mới x2, không cần mật khẩu cũ/email — giống `EditProfileScreen` bên app), card "Lịch tập" dẫn sang `workout-plan.html`, card "Quản trị" (chỉ hiện nếu `is_admin=true`) dẫn sang `admin-waitlist.html`.
   - `workout-plan.html` — lịch tập 4 tuần (**tên cũ là `home.html`, đã đổi** vì nó không phải trang chủ). Sửa được từng ngày tại chỗ (đổi tên buổi/thêm-bớt-sửa bài tập), giống `_DayDetailSheet` bên app.
   - `admin-waitlist.html` — chỉ admin, xem + xuất CSV danh sách waitlist.
+  - `admin-feedback.html` — chỉ admin, xem + xuất CSV góp ý của người dùng (tên, email, nội dung, thời gian). Hai trang admin có tab điều hướng qua lại.
   - `assets/js/onboarding-options.js`, `assets/js/workout-plan.js` — **port 1:1 từ `lib/models/onboarding_options.dart`/`workout_plan.dart` bên repo app**. Đổi logic bên app thì nhớ đổi cả 2 file JS này, không tự động đồng bộ.
   - `assets/js/i18n.js` — **chuyển ngôn ngữ VI/EN** cho mọi trang (nút VI/EN ở header). Từ điển `I18N.vi`/`I18N.en` phải có CÙNG bộ khóa. HTML tĩnh dùng `data-i18n`/`data-i18n-placeholder`/`data-i18n-title`/`data-i18n-alt`; chuỗi trong JS dùng `t("khoá", {vars})`; ngày giờ dùng `getLocale()`. Lựa chọn lưu ở `localStorage` key `posturex_lang` (mặc định `vi`). Phần nội dung sinh bằng JS không nằm trong `[data-i18n]` thì phải tự vẽ lại ở listener sự kiện `posturex:langchange` (đã làm ở `register`, `account`, `workout-plan`, `admin-waitlist`). **Thêm chuỗi mới → thêm khóa vào CẢ HAI ngôn ngữ.**
   - `assets/images/`.
 - `backend/` — FastAPI, phục vụ luôn `landing/` qua `StaticFiles` (mount `/` phải đặt SAU mọi route khác trong `app/main.py`).
-  - `app/api/routes/`: `auth.py` (register/verify-otp/resend-otp/login/logout/me, `require_login`, `require_admin`), `waitlist.py`, `admin.py`, `profile.py` (mới — `GET/PUT /api/profile`, `PATCH /api/account`, `GET /api/exercises`, đều proxy sang backend app).
+  - `app/api/routes/`: `auth.py` (register/verify-otp/resend-otp/login/logout/me, `require_login`, `require_admin`), `waitlist.py`, `feedback.py`, `admin.py`, `profile.py` (mới — `GET/PUT /api/profile`, `PATCH /api/account`, `GET /api/exercises`, đều proxy sang backend app).
   - `app/core/`: `config.py`, `security.py` (session JWT — **giờ nhúng thêm `backend_access_token`** của backend app vào payload, để các route proxy dùng lại không cần đăng nhập lại lần nữa), `database.py` (SQLite), `rate_limit.py`.
   - `app/models/waitlist.py`, `app/schemas/` (`admin.py`, `auth.py`, `profile.py`), `app/services/posturex_client.py` (mọi hàm gọi sang backend app).
-  - DB: SQLite tại `backend/data/web.db` (bảng `waitlist_signups`).
+  - DB: SQLite tại `backend/data/web.db` (bảng `waitlist_signups`, `feedbacks`; bảng mới tự tạo lúc khởi động qua `init_db`).
 - Repo này TÁCH với backend app PostureX (repo khác, mặc định `http://localhost:9000/api/v1`). Web không có bảng Users; mọi thao tác tài khoản (đăng ký/OTP/đăng nhập/sửa hồ sơ/đổi mật khẩu) đều proxy sang backend app qua httpx.
 
 ### Lịch tập lưu ở đâu — đọc kỹ trước khi đụng vào
@@ -48,6 +49,13 @@ venv\Scripts\activate
 uvicorn app.main:app --reload     # http://localhost:8000
 ```
 Cần `backend/.env` (copy từ `.env.example`, đặt `SECRET_KEY`). Đăng nhập admin cần backend app chạy ở cổng 9000.
+
+**Bật web thì bật luôn backend app** (yêu cầu của chủ dự án): repo app ở `D:/FPT Study/ky_7/PostureX/backend`, chạy `./run.ps1` (cổng 9000, cần MySQL). Thiếu nó thì đăng nhập/đăng ký lỗi 500.
+
+## Góp ý (feedback) — hiện trạng
+- Form "Góp ý của bạn" ở `index.html` (section `#feedback`, trước footer) → `POST /api/feedback` {name, email, message, website}. Công khai, giới hạn 5 lượt/giờ/IP; `website` là ô ẩn chống bot (honeypot — có giá trị thì trả thành công nhưng KHÔNG lưu). Giới hạn: tên 1–100, nội dung 10–2000 ký tự.
+- `GET /api/admin/feedback`: chỉ admin (cùng `require_admin` với waitlist). Nội dung do người lạ nhập → luôn `escapeHtml` khi chèn vào innerHTML; CSV có chống CSV-injection + BOM cho Excel.
+- Chưa có: xoá/đánh dấu đã đọc góp ý, thông báo cho team khi có góp ý mới.
 
 ## Waitlist — hiện trạng
 - `POST /api/waitlist`: lưu `email` + `source`, giới hạn 10 lượt/giờ; email trùng vẫn trả thông báo thành công.
@@ -118,3 +126,4 @@ Cần `backend/.env` (copy từ `.env.example`, đặt `SECRET_KEY`). Đăng nh�
 - 2026-10-14 — **Hoàn thiện chuyển đổi ngôn ngữ VI/EN** (trước đó mới xong `index.html` + một phần `login.html`, commit "chua hoan thien"). Gắn i18n cho `register.html`, `account.html`, `workout-plan.html`, `admin-waitlist.html`, `not-found.html`; hoàn tất `login.html` (câu lỗi dự phòng) và `alt` ảnh ở `index.html` (thêm `data-i18n-alt`). `i18n.js`: thêm `getLocale()`, các khóa `common.processing/edit/remove`, `account.loading`, `account.changePassword`, `plan.backToProfile` (giờ 200 khóa, VI/EN khớp 100%, không khóa nào thiếu — đã kiểm bằng Node, cú pháp các `<script>` inline hợp lệ). Chưa test bằng trình duyệt thật.
   - **Chưa dịch (cố ý/để sau):** nhãn lựa chọn (Male/Female, Beginner…, nhóm cơ/thiết bị/mục tiêu) và tên bài tập vẫn tiếng Anh vì là dữ liệu port 1:1 từ app; thông báo lỗi `detail` do backend app trả về (tiếng Việt); thẻ `<title>` của từng trang.
   - Không đọc được CLAUDE.md của repo app (không có trong workspace này) — nếu app có quy ước i18n riêng (khóa, thuật ngữ) thì cần đối chiếu lại.
+- 2026-10-15 — **Thêm tính năng góp ý (feedback).** Backend: model `Feedback`, `schemas/feedback.py`, `routes/feedback.py` (`POST /api/feedback`), `GET /api/admin/feedback` trong `admin.py`. Frontend: section góp ý ở `index.html`, trang `admin-feedback.html` + tab điều hướng trong `admin-waitlist.html`, thêm 22 khóa i18n (giờ 222, VI/EN khớp). Cũng trong ngày: trang admin waitlist hiển thị nhãn thân thiện cho cột Nguồn (`hero` → "Đầu trang chủ", `download` → "Mục tải ứng dụng", khóa `admin.source.<mã>`; DB vẫn lưu mã gốc). Đã test API bằng script (gửi hợp lệ, honeypot, email/nội dung/tên sai → 422, admin 401/403/200, đã xoá dữ liệu thử); chưa test giao diện bằng trình duyệt thật.

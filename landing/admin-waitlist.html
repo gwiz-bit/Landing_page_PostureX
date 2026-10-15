@@ -45,6 +45,13 @@
     font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 999px; cursor: pointer;
   }
   .lang-toggle button.active { background: var(--primary); color: var(--on-primary); }
+  .admin-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+  .admin-tabs a {
+    padding: 8px 18px; border-radius: 999px; font-size: 0.86rem; font-weight: 600;
+    color: var(--text-secondary); border: 1px solid var(--border); background: var(--surface-elevated);
+  }
+  .admin-tabs a:hover { color: var(--text-primary); }
+  .admin-tabs a.active { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
   main.wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
   h1 { font-family: "Inter", sans-serif; font-size: 1.5rem; margin: 0 0 6px; }
   .subtitle { color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 28px; }
@@ -105,6 +112,11 @@
 </header>
 
 <main class="wrap">
+  <nav class="admin-tabs">
+    <a href="admin-waitlist.html" class="active" data-i18n="admin.tab.waitlist">Đăng ký tải trước</a>
+    <a href="admin-feedback.html" data-i18n="admin.tab.feedback">Góp ý</a>
+  </nav>
+
   <h1 data-i18n="admin.title">Danh sách đăng ký tải trước</h1>
   <p class="subtitle" data-i18n="admin.subtitle">Email người dùng đã đăng ký nhận thông báo khi PostureX ra mắt.</p>
 
@@ -143,6 +155,14 @@
     return d.toLocaleString(getLocale(), { dateStyle: "short", timeStyle: "short" });
   }
 
+  // Giá trị lưu trong DB là mã kỹ thuật (hero/download, theo data-source ở
+  // index.html) — chỉ đổi cách HIỂN THỊ; mã lạ (vd kênh quảng cáo) hiện nguyên.
+  function sourceLabel(source) {
+    const key = `admin.source.${source}`;
+    const label = t(key);
+    return label === key ? source : label;
+  }
+
   function escapeHtml(s) {
     return s.replace(/[&<>"']/g, (c) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -156,7 +176,7 @@
     tbody.innerHTML = entries.map((e) => `
       <tr>
         <td>${escapeHtml(e.email)}</td>
-        <td>${e.source ? `<span class="source-tag">${escapeHtml(e.source)}</span>` : "—"}</td>
+        <td>${e.source ? `<span class="source-tag">${escapeHtml(sourceLabel(e.source))}</span>` : "—"}</td>
         <td>${formatDate(e.created_at)}</td>
       </tr>
     `).join("");

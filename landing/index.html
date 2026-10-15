@@ -609,6 +609,52 @@
   }
   .download-row { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
 
+  /* ---------- Form góp ý ---------- */
+  .feedback-panel {
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px;
+  }
+  @media (max-width: 620px) { .feedback-panel { padding: 32px 20px; } }
+  .feedback-panel h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; margin-top: 12px; }
+  .feedback-panel > p { color: var(--text-secondary); line-height: 1.6; margin: 12px 0 28px; }
+  .feedback-form { display: flex; flex-direction: column; gap: 12px; }
+  .feedback-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .feedback-row input { flex: 1 1 220px; min-width: 0; }
+  .feedback-form input[type="text"],
+  .feedback-form input[type="email"],
+  .feedback-form textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 13px 18px;
+    color: var(--text-primary);
+    font-size: 0.92rem;
+    font-family: inherit;
+    width: 100%;
+  }
+  .feedback-form textarea { resize: vertical; min-height: 120px; line-height: 1.5; }
+  .feedback-form input:focus, .feedback-form textarea:focus { outline: none; border-color: var(--primary); }
+  .feedback-form button {
+    align-self: flex-start;
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    border-radius: 999px;
+    padding: 13px 28px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .feedback-form button:hover { opacity: 0.92; transform: translateY(-1px); }
+  .feedback-form button:disabled { opacity: 0.55; cursor: default; transform: none; }
+  .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
   /* ---------- Contact / footer ---------- */
   footer { padding: 64px 0 40px; }
   .contact-grid {
@@ -857,6 +903,27 @@
   </div>
 </section>
 
+<section id="feedback">
+  <div class="wrap">
+    <div class="feedback-panel reveal">
+      <span class="eyebrow" data-i18n="feedback.eyebrow">Góp ý của bạn</span>
+      <h2 data-i18n="feedback.title">Bạn thấy PostureX cần cải thiện điều gì?</h2>
+      <p data-i18n="feedback.body">Mọi góp ý đều được đội ngũ đọc trực tiếp. Chia sẻ trải nghiệm, ý tưởng hoặc lỗi bạn gặp để chúng tôi làm app tốt hơn.</p>
+      <form class="feedback-form" id="feedback-form" novalidate>
+        <div class="feedback-row">
+          <input type="text" id="fb-name" maxlength="100" autocomplete="name" data-i18n-placeholder="feedback.namePlaceholder" placeholder="Họ và tên" required />
+          <input type="email" id="fb-email" maxlength="256" autocomplete="email" data-i18n-placeholder="feedback.emailPlaceholder" placeholder="Email của bạn" required />
+        </div>
+        <textarea id="fb-message" rows="5" maxlength="2000" data-i18n-placeholder="feedback.messagePlaceholder" placeholder="Nội dung góp ý (tối thiểu 10 ký tự)" required></textarea>
+        <!-- Ô ẩn chống bot (honeypot) — người thật không thấy, không điền -->
+        <input type="text" id="fb-website" class="hp-field" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button type="submit" id="fb-submit" data-i18n="feedback.submit">Gửi góp ý</button>
+      </form>
+      <p class="waitlist-msg" id="fb-msg"></p>
+    </div>
+  </div>
+</section>
+
 <footer id="contact">
   <div class="wrap">
     <div class="contact-grid reveal">
@@ -918,6 +985,52 @@
   navLinksEl.querySelectorAll("a").forEach((a) => {
     a.addEventListener("click", () => setMenuOpen(false));
   });
+
+  // Góp ý của người dùng — POST /api/feedback, admin xem ở admin-feedback.html
+  (function () {
+    const form = document.getElementById("feedback-form");
+    const msgEl = document.getElementById("fb-msg");
+    const button = document.getElementById("fb-submit");
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function show(text, kind) {
+      msgEl.textContent = text;
+      msgEl.className = "waitlist-msg" + (kind ? " " + kind : "");
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      show("", "");
+
+      const name = document.getElementById("fb-name").value.trim();
+      const email = document.getElementById("fb-email").value.trim();
+      const message = document.getElementById("fb-message").value.trim();
+
+      if (!name) return show(t("feedback.nameRequired"), "error");
+      if (!EMAIL_RE.test(email)) return show(t("feedback.invalidEmail"), "error");
+      if (message.length < 10) return show(t("feedback.messageTooShort"), "error");
+
+      button.disabled = true;
+      button.textContent = t("feedback.sending");
+      try {
+        const res = await fetch("/api/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, message, website: document.getElementById("fb-website").value }),
+        });
+        const data = await res.json().catch(() => ({}));
+        // 422 của FastAPI trả detail là mảng — không hiện thẳng cho người dùng
+        if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : t("feedback.genericError"));
+        show(t("feedback.success"), "success");
+        form.reset();
+      } catch (err) {
+        show(err.message || t("feedback.genericError"), "error");
+      } finally {
+        button.disabled = false;
+        button.textContent = t("feedback.submit");
+      }
+    });
+  })();
 
   // Đăng ký tải trước (waitlist) — mọi form [data-waitlist-form] trên trang
   document.querySelectorAll("[data-waitlist-form]").forEach((form) => {
