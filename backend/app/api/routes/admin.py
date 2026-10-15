@@ -1,4 +1,4 @@
-"""Route chỉ dành cho admin — xem danh sách waitlist và góp ý của người dùng.
+"""Route chỉ dành cho admin — xem danh sách waitlist, góp ý và tester.
 
 Dùng chung tài khoản admin với app PostureX (is_admin nhúng sẵn trong
 session JWT của web lúc đăng nhập, xem `routes/auth.py::require_admin`) —
@@ -11,8 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.routes.auth import require_admin
 from app.core.database import get_db
 from app.models.feedback import Feedback
+from app.models.tester import TesterSignup
 from app.models.waitlist import WaitlistSignup
-from app.schemas.admin import FeedbackListOut, WaitlistListOut
+from app.schemas.admin import FeedbackListOut, TesterListOut, WaitlistListOut
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -35,3 +36,12 @@ async def list_feedback(
     result = await db.scalars(select(Feedback).order_by(Feedback.created_at.desc()))
     entries = list(result)
     return FeedbackListOut(total=len(entries), entries=entries)
+
+
+@router.get("/testers", response_model=TesterListOut)
+async def list_testers(
+    _admin: dict = Depends(require_admin), db: AsyncSession = Depends(get_db)
+) -> TesterListOut:
+    result = await db.scalars(select(TesterSignup).order_by(TesterSignup.created_at.desc()))
+    entries = list(result)
+    return TesterListOut(total=len(entries), entries=entries)
