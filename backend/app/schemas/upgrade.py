@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class UpgradeIn(BaseModel):
-    plan: Literal["premium", "pro"]
+    plan: Literal["pro"]
 
 
 class UpgradeOut(BaseModel):

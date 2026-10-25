@@ -129,6 +129,7 @@
   .plan li::before { content: "✓"; color: var(--primary); font-weight: 800; }
   .plan .btn { display: block; text-align: center; background: var(--primary); color: var(--on-primary); border-radius: 999px; padding: 14px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.15s ease; }
   .plan .btn:hover { opacity: 0.92; }
+  .plan .free-note { text-align: center; color: var(--text-tertiary); font-size: 0.86rem; padding: 14px; border: 1px dashed var(--border); border-radius: 999px; }
   .plan:not(.featured) .btn { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
   .plans-note { text-align: center; color: var(--text-tertiary); font-size: 0.82rem; line-height: 1.6; margin-top: 24px; }
 </style>
@@ -155,23 +156,23 @@
 
   <div class="plans">
     <div class="plan">
-      <h2>Premium</h2>
-      <div class="price">59.000đ<small data-i18n="upgrade.perMonth">/tháng</small></div>
+      <h2>Free</h2>
+      <div class="price">0đ</div>
       <ul>
-        <li data-i18n="upgrade.premium.f1">Toàn bộ bài tập</li>
-        <li data-i18n="upgrade.premium.f2">Phản hồi bằng giọng nói</li>
-        <li data-i18n="upgrade.premium.f3">Lịch sử tập không giới hạn</li>
+        <li data-i18n="upgrade.free.f1">Phát hiện tư thế cơ bản</li>
+        <li data-i18n="upgrade.free.f2">Tối đa 3 bài tập mỗi ngày</li>
       </ul>
-      <a class="btn" href="checkout.html?plan=premium" data-i18n="upgrade.buy">Mua gói này</a>
+      <div class="free-note" data-i18n="upgrade.free.note">Có sẵn cho mọi tài khoản</div>
     </div>
     <div class="plan featured">
       <span class="badge" data-i18n="upgrade.pro.badge">Đầy đủ nhất</span>
       <h2>Pro</h2>
-      <div class="price">89.000đ<small data-i18n="upgrade.perMonth">/tháng</small></div>
+      <div class="price">59.000đ<small data-i18n="upgrade.perMonth">/tháng</small></div>
       <ul>
-        <li data-i18n="upgrade.pro.f1">Toàn bộ tính năng Premium</li>
-        <li data-i18n="upgrade.pro.f2">Chương trình cá nhân hoá bằng AI</li>
-        <li data-i18n="upgrade.pro.f3">Phân tích chuyên sâu</li>
+        <li data-i18n="upgrade.pro.f1">Toàn bộ bài tập</li>
+        <li data-i18n="upgrade.pro.f2">Lịch sử tập không giới hạn</li>
+        <li data-i18n="upgrade.pro.f3">Chương trình cá nhân hoá bằng AI</li>
+        <li data-i18n="upgrade.pro.f4">Phân tích chuyên sâu</li>
       </ul>
       <a class="btn" href="checkout.html?plan=pro" data-i18n="upgrade.buy">Mua gói này</a>
     </div>

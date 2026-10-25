@@ -210,7 +210,7 @@
   };
 
   // Giá chỉ để HIỂN THỊ — số tiền thật do server quyết định (routes/upgrade.py).
-  const PLANS = { premium: { name: "Premium", amount: 59000 }, pro: { name: "Pro", amount: 89000 } };
+  const PLANS = { pro: { name: "Pro", amount: 59000 } };
 
   const planKey = new URLSearchParams(location.search).get("plan");
   const plan = PLANS[planKey];

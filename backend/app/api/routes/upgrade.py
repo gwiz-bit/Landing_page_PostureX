@@ -1,7 +1,8 @@
 """Nâng cấp gói bằng chuyển khoản — người dùng báo "đã chuyển khoản".
 
-Tên gói khớp bảng SubscriptionPlans của app (Premium, Pro) nhưng GIÁ ở đây
-(59k/89k) là giá bán trên web — app chưa đổi theo, xem CLAUDE.md."""
+Web chỉ bán 1 gói trả phí là Pro (59k/tháng); gói Free không cần mua. GIÁ ở
+đây là giá bán trên web — bảng SubscriptionPlans của app chưa đổi theo, xem
+CLAUDE.md."""
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
@@ -16,7 +17,7 @@ from app.schemas.upgrade import UpgradeIn, UpgradeOut
 router = APIRouter(prefix="/api/upgrade", tags=["upgrade"])
 
 # Giá/tháng (VND) theo mã gói client gửi. Nguồn duy nhất ở server.
-PLAN_PRICES = {"premium": ("Premium", 59000), "pro": ("Pro", 89000)}
+PLAN_PRICES = {"pro": ("Pro", 59000)}
 
 
 def transfer_code(user_id: int, plan_key: str) -> str:
