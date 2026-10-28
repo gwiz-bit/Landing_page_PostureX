@@ -10,6 +10,7 @@ backup/di chuyển.
 
 from pathlib import Path
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -25,11 +26,32 @@ class Base(DeclarativeBase):
     pass
 
 
+# Cột thêm vào bảng ĐÃ TỒN TẠI sau lần tạo đầu — create_all không tự thêm cột
+# vào bảng cũ, nên bổ sung bằng ALTER TABLE (chỉ thêm, không xoá/đổi dữ liệu).
+_ADDED_COLUMNS = {
+    "upgrade_requests": {
+        "paid_at": "DATETIME",
+        "expires_at": "DATETIME",
+        "paid_amount": "INTEGER",
+        "sepay_id": "INTEGER",
+    },
+}
+
+
 async def init_db() -> None:
     """Tạo bảng còn thiếu — gọi lúc khởi động app, an toàn chạy lại nhiều lần
     (không xoá bảng/dữ liệu đã có, giống ensure_tables.py bên backend app)."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        for table, columns in _ADDED_COLUMNS.items():
+            existing = {row[1] for row in (await conn.execute(text(f"PRAGMA table_info({table})"))).all()}
+            for name, sql_type in columns.items():
+                if name not in existing:
+                    await conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {sql_type}"))
+        # Mỗi giao dịch SePay chỉ được ghi nhận một lần (NULL được lặp lại).
+        await conn.execute(
+            text("CREATE UNIQUE INDEX IF NOT EXISTS ux_upgrade_requests_sepay_id ON upgrade_requests(sepay_id)")
+        )
 
 
 async def get_db():

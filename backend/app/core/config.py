@@ -31,6 +31,23 @@ class Settings(BaseSettings):
     # Bật lại bằng cách đổi thành True trong .env, không cần đổi code.
     REGISTRATION_ENABLED: bool = False
 
+    # SePay (tự xác nhận chuyển khoản mua gói). SEPAY_API_KEY là chuỗi bí mật đặt
+    # ở cả `.env` này lẫn trang cấu hình webhook của SePay (kiểu xác thực API Key).
+    # Để trống = webhook từ chối mọi yêu cầu. SEPAY_ACCOUNT_NUMBER (tuỳ chọn): chỉ
+    # nhận giao dịch vào đúng số tài khoản này.
+    SEPAY_API_KEY: str = ""
+    SEPAY_ACCOUNT_NUMBER: str = ""
+
+    # Cổng thanh toán SePay (my.sepay.vn → Cổng thanh toán). MERCHANT ID + SECRET KEY lấy
+    # ở màn hình tích hợp (Sandbox và Production là HAI bộ khác nhau). SECRET KEY dùng để
+    # ký form thanh toán VÀ cũng là giá trị header X-Secret-Key mà SePay gửi kèm IPN.
+    # Để trống = không tạo được đơn thanh toán. PUBLIC_BASE_URL (tuỳ chọn) là địa chỉ web
+    # công khai dùng cho đường dẫn quay về (vd https://posturex.vn); bỏ trống thì lấy từ request.
+    SEPAY_PG_MERCHANT_ID: str = ""
+    SEPAY_PG_SECRET_KEY: str = ""
+    SEPAY_PG_ENV: str = "sandbox"  # "sandbox" hoặc "production"
+    PUBLIC_BASE_URL: str = ""
+
     # DB riêng của web — chỉ chứa SupportTickets/Vouchers, KHÔNG có bảng Users.
     DB_HOST: str = "localhost"
     DB_PORT: int = 3306

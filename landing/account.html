@@ -185,6 +185,13 @@
 
       <div class="info-row">
         <div class="info-text">
+          <span class="info-label" data-i18n="account.planLabel">Gói hiện tại</span>
+          <span class="info-value" id="value-plan">—</span>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <div class="info-text">
           <span class="info-label" data-i18n="account.phoneLabel">Số điện thoại</span>
           <span class="info-value muted" data-i18n="account.notUpdated">(chưa cập nhật)</span>
         </div>
@@ -251,11 +258,24 @@
   let currentFullName = "";
   let currentEmail = "";
   let currentProfile = {};
+  let currentPlan = null; // {plan, expires_at} từ GET /api/upgrade/me
+
+  function renderPlan() {
+    const el = document.getElementById("value-plan");
+    if (!currentPlan || currentPlan.plan !== "Pro" || !currentPlan.expires_at) {
+      el.textContent = t("account.planFree");
+      return;
+    }
+    const iso = currentPlan.expires_at.endsWith("Z") ? currentPlan.expires_at : currentPlan.expires_at + "Z";
+    const date = new Date(iso).toLocaleDateString(getLocale(), { day: "2-digit", month: "2-digit", year: "numeric" });
+    el.textContent = t("account.planPro", { date });
+  }
 
   // Phần sinh bằng JS (nhãn các trường cơ thể, "(chưa cập nhật)") không nằm
   // trong [data-i18n] nên applyI18n() không chạm tới — vẽ lại tay khi đổi ngôn ngữ.
   document.addEventListener("posturex:langchange", () => {
     renderBodyInfo(currentProfile);
+    renderPlan();
     if (!currentFullName) document.getElementById("value-full-name").textContent = t("account.notUpdated");
   });
 
@@ -591,6 +611,12 @@
       currentEmail = me.email;
       document.getElementById("value-full-name").textContent = currentFullName || t("account.notUpdated");
       document.getElementById("value-email").textContent = me.email;
+
+      try {
+        const planRes = await fetch("/api/upgrade/me", { credentials: "include" });
+        if (planRes.ok) currentPlan = await planRes.json();
+      } catch {}
+      renderPlan();
 
       const profileRes = await fetch("/api/profile", { credentials: "include" });
       const profile = profileRes.ok ? await profileRes.json() : {};

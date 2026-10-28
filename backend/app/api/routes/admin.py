@@ -12,6 +12,7 @@ from app.api.routes.auth import require_admin
 from app.core.database import get_db
 from app.models.feedback import Feedback
 from app.models.upgrade import STATUS_PENDING, UpgradeRequest
+from app.services.upgrade_service import grant_paid
 from app.models.waitlist import WaitlistSignup
 from app.schemas.admin import FeedbackListOut, WaitlistListOut
 from app.schemas.upgrade import UpgradeEntryOut, UpgradeListOut, UpgradeStatusIn
@@ -55,13 +56,18 @@ async def set_upgrade_status(
     _admin: dict = Depends(require_admin),
     db: AsyncSession = Depends(get_db),
 ) -> UpgradeEntryOut:
-    """Đánh dấu đơn đã xử lý. KHÔNG kích hoạt gói trong app — leader tự làm
-    việc đó trong app trước, rồi mới bấm "approved" ở đây để ghi nhận."""
+    """Xử lý tay một đơn đang chờ. Bình thường đơn tự sang "paid" nhờ webhook
+    SePay — nút này chỉ để dự phòng khi khách đã chuyển khoản nhưng đơn không
+    tự cập nhật (sai nội dung, webhook lỗi...). "paid" cấp gói y như webhook.
+    Không kích hoạt gói trong app (app chưa hỗ trợ)."""
     entry = await db.get(UpgradeRequest, upgrade_id)
     if entry is None:
         raise HTTPException(status_code=404, detail="Không tìm thấy đơn.")
     if entry.status != STATUS_PENDING:
         raise HTTPException(status_code=409, detail="Đơn này đã được xử lý.")
-    entry.status = data.status
-    await db.commit()
+    if data.status == "paid":
+        await grant_paid(db, entry, paid_amount=entry.amount)
+    else:
+        entry.status = data.status
+        await db.commit()
     return entry

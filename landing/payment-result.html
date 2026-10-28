@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kết quả thanh toán — PostureX</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="favicon-256.png" type="image/png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0B0C0D; --surface: #1A1B1D; --surface-elevated: #222325; --border: #2C2D30;
+    --primary: #FF6F4F; --primary-muted: #402920; --on-primary: #FFFFFF;
+    --text-primary: #F5F5F5; --text-secondary: #9A9A9E; --text-tertiary: #5C5D60;
+    --danger: #FF6B6B; --danger-muted: #3A1F1F; --success: #4ADE80;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text-primary);
+    font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+  }
+  a { color: inherit; text-decoration: none; }
+  header.top-bar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px;
+    background: rgba(11, 12, 13, 0.82);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  header.top-bar .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: "Inter", sans-serif; font-weight: 800; font-size: 1.05rem;
+  }
+  header.top-bar .home-link { font-size: 0.86rem; color: var(--text-secondary); }
+  header.top-bar .home-link:hover { color: var(--text-primary); }
+  .lang-toggle {
+    display: flex; align-items: center; gap: 2px; background: var(--surface-elevated);
+    border: 1px solid var(--border); border-radius: 999px; padding: 3px; margin-left: 14px;
+  }
+  .lang-toggle button {
+    background: none; border: none; color: var(--text-secondary); font-family: inherit;
+    font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--primary); color: var(--on-primary); }
+  main.wrap { max-width: 520px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-family: "Inter", sans-serif; font-size: 1.6rem; font-weight: 800; margin: 0 0 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 8px 24px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .row:last-child { border-bottom: none; }
+  .row .k { color: var(--text-tertiary); font-size: 0.82rem; }
+  .row .v { font-weight: 600; font-size: 0.95rem; text-align: right; }
+  .row .v.big { font-family: "Inter", sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+  .btn {
+    display: block; width: 100%; text-align: center; margin-top: 24px;
+    background: var(--primary); color: var(--on-primary); border: none; border-radius: 999px;
+    padding: 15px; font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  .btn:hover { opacity: 0.92; }
+  .btn:disabled { opacity: 0.55; cursor: default; }
+  .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); margin-top: 12px; }
+  .btn.ghost:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+  .note { color: var(--text-tertiary); font-size: 0.82rem; line-height: 1.6; margin: 16px 0 0; text-align: center; }
+  .msg { font-size: 0.86rem; margin-top: 14px; min-height: 1.2em; color: var(--danger); text-align: center; }
+  .back-btn { display: block; margin: 18px auto 0; background: none; border: none; color: var(--text-secondary); font-family: inherit; font-size: 0.86rem; font-weight: 600; cursor: pointer; }
+  .back-btn:hover { color: var(--text-primary); }
+
+  .state { display: none; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 44px 28px; }
+  .state.active { display: block; }
+  .state .icon { font-size: 3rem; line-height: 1; margin-bottom: 14px; }
+  .state .icon.ok { color: var(--success); }
+  .state .icon.bad { color: var(--danger); }
+  .state h1 { font-size: 1.4rem; margin: 0 0 10px; }
+  .state p { color: var(--text-secondary); line-height: 1.6; margin: 0 0 8px; font-size: 0.94rem; }
+  .state .btn { display: inline-block; width: auto; min-width: 180px; padding: 13px 28px; }
+  .state .actions { margin-top: 24px; }
+  .spinner { width: 34px; height: 34px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; margin: 0 auto 18px; animation: spin 0.9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+  <a href="index.html" class="brand">
+    <img src="assets/images/logo-icon.png" width="24" height="24" alt="" style="border-radius:6px;" />
+    PostureX
+  </a>
+  <div style="display:flex; align-items:center;">
+    <a href="index.html" class="home-link" data-i18n="nav.backHome">← Trang chủ</a>
+    <div class="lang-toggle">
+      <button type="button" data-lang-toggle="vi" onclick="setLang('vi')">VI</button>
+      <button type="button" data-lang-toggle="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="state active" id="st-checking">
+    <div class="spinner"></div>
+    <h1 data-i18n="checkout.checking">Đang xác nhận thanh toán...</h1>
+  </div>
+
+  <div class="state" id="st-success">
+    <div class="icon ok">✓</div>
+    <h1 data-i18n="checkout.doneTitle">Thanh toán thành công</h1>
+    <p id="success-body"></p>
+    <div class="actions">
+      <a class="btn" href="index.html" data-i18n="checkout.home">Về trang chủ</a>
+    </div>
+  </div>
+
+  <div class="state" id="st-pending">
+    <div class="icon">⏳</div>
+    <h1 data-i18n="checkout.pendingTitle">Đang chờ xác nhận</h1>
+    <p data-i18n="checkout.pendingBody">Chúng tôi chưa nhận được xác nhận từ cổng thanh toán. Nếu bạn đã thanh toán, gói sẽ tự cập nhật trong ít phút — kiểm tra ở trang Hồ sơ. Nếu sau 10 phút chưa thấy, hãy liên hệ đội ngũ hỗ trợ ở cuối trang chủ.</p>
+    <div class="actions">
+      <a class="btn" href="account.html" data-i18n="checkout.viewProfile">Xem hồ sơ</a>
+      <a class="btn ghost" href="index.html" data-i18n="checkout.home">Về trang chủ</a>
+    </div>
+  </div>
+
+  <div class="state" id="st-fail">
+    <div class="icon bad">✕</div>
+    <h1 data-i18n="checkout.failTitle">Thanh toán chưa thành công</h1>
+    <p data-i18n="checkout.failBody">Giao dịch chưa hoàn tất. Bạn có thể thử lại. Nếu bạn đã bị trừ tiền, gói vẫn sẽ được nâng cấp khi chúng tôi nhận được xác nhận.</p>
+    <div class="actions">
+      <a class="btn" href="index.html#pricing" data-i18n="checkout.retry">Thử lại</a>
+      <a class="btn ghost" href="index.html" data-i18n="checkout.home">Về trang chủ</a>
+    </div>
+  </div>
+
+  <div class="state" id="st-cancel">
+    <div class="icon">↩</div>
+    <h1 data-i18n="checkout.cancelTitle">Bạn đã huỷ thanh toán</h1>
+    <p data-i18n="checkout.cancelBody">Bạn chưa thanh toán gói nào. Có thể thử lại bất cứ lúc nào.</p>
+    <div class="actions">
+      <a class="btn" href="index.html#pricing" data-i18n="checkout.retry">Thử lại</a>
+      <a class="btn ghost" href="index.html" data-i18n="checkout.home">Về trang chủ</a>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/i18n.js"></script>
+<script>
+  // Trang SePay đưa người dùng về đây: ?order=<id>&status=success|error|cancel.
+  // `status` trên URL chỉ quyết định cái gì HIỂN THỊ — ai cũng sửa được URL. Gói chỉ được cấp
+  // khi SePay gọi IPN về server; trang này hỏi server xem đơn đã thành "paid" chưa.
+  const params = new URLSearchParams(location.search);
+  const orderId = params.get("order");
+  const urlStatus = params.get("status");
+  let me = null;
+  let shown = "checking";
+  let expiresAt = null;
+
+  function show(name) {
+    shown = name;
+    document.querySelectorAll(".state").forEach((el) => el.classList.remove("active"));
+    document.getElementById("st-" + name).classList.add("active");
+    if (name === "success") renderSuccessBody();
+  }
+
+  function renderSuccessBody() {
+    if (!me || !expiresAt) return;
+    const iso = expiresAt.endsWith("Z") ? expiresAt : expiresAt + "Z";
+    const date = new Date(iso).toLocaleDateString(getLocale(), { day: "2-digit", month: "2-digit", year: "numeric" });
+    document.getElementById("success-body").textContent = t("checkout.doneBody", { email: me.email, date });
+  }
+  document.addEventListener("posturex:langchange", () => { if (shown === "success") renderSuccessBody(); });
+
+  async function fetchOrder() {
+    const res = await fetch(`/api/upgrade/order/${encodeURIComponent(orderId)}`, { credentials: "include" });
+    if (res.status === 401) { location.replace("login.html"); return null; }
+    if (!res.ok) return undefined;
+    return res.json();
+  }
+
+  // IPN thường đến sau vài giây: hỏi mỗi 3 giây, tối đa ~90 giây.
+  async function waitForPayment() {
+    for (let i = 0; i < 30; i++) {
+      try {
+        const order = await fetchOrder();
+        if (order === null) return;
+        if (order === undefined) { show("fail"); return; }
+        if (order.status === "paid" && order.expires_at) {
+          expiresAt = order.expires_at;
+          show("success");
+          return;
+        }
+      } catch {
+        // mất mạng thoáng qua — thử lại ở vòng sau
+      }
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+    show("pending");
+  }
+
+  (async () => {
+    if (!orderId) { location.replace("index.html"); return; }
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "include" });
+      if (!res.ok) { location.replace("login.html"); return; }
+      me = await res.json();
+    } catch {
+      location.replace("login.html");
+      return;
+    }
+    if (urlStatus === "cancel") { show("cancel"); return; }
+    if (urlStatus === "error") { show("fail"); return; }
+    waitForPayment();
+  })();
+</script>
+
+</body>
+</html>

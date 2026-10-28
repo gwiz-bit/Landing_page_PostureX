@@ -9,9 +9,22 @@ class UpgradeIn(BaseModel):
 
 
 class UpgradeOut(BaseModel):
-    message: str
-    transfer_code: str
+    order_id: int
+    invoice: str
     amount: int
+    # Trình duyệt POST các `fields` (đúng thứ tự) tới `action` để sang trang thanh toán SePay.
+    action: str
+    fields: dict[str, str]
+
+
+class OrderStatusOut(BaseModel):
+    status: str
+    expires_at: datetime | None
+
+
+class MyPlanOut(BaseModel):
+    plan: str  # "Pro" hoặc "Free"
+    expires_at: datetime | None
 
 
 class UpgradeEntryOut(BaseModel):
@@ -26,6 +39,9 @@ class UpgradeEntryOut(BaseModel):
     transfer_code: str
     status: str
     created_at: datetime
+    paid_at: datetime | None
+    expires_at: datetime | None
+    paid_amount: int | None
 
 
 class UpgradeListOut(BaseModel):
@@ -34,4 +50,4 @@ class UpgradeListOut(BaseModel):
 
 
 class UpgradeStatusIn(BaseModel):
-    status: Literal["approved", "rejected"]
+    status: Literal["paid", "cancelled"]
