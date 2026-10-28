@@ -707,26 +707,34 @@
   .feedback-form button:disabled { opacity: 0.55; cursor: default; transform: none; }
   .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
-  /* ---------- Section làm tester ---------- */
-  .tester-panel {
-    max-width: 880px; margin: 0 auto; text-align: center;
-    background: var(--surface); border: 1px solid var(--primary); border-radius: 24px; padding: 48px;
+  /* ---------- Bảng gói (Free / Pro) ---------- */
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; }
+  @media (max-width: 680px) { .plans { grid-template-columns: 1fr; } }
+  .plan {
+    position: relative; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px 28px; display: flex; flex-direction: column;
   }
-  @media (max-width: 620px) { .tester-panel { padding: 32px 20px; } }
-  .tester-panel h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; margin-top: 12px; }
-  .tester-panel > p { color: var(--text-secondary); line-height: 1.6; max-width: 52ch; margin: 12px auto 28px; }
-  .tester-benefits { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
-  .tester-benefits span {
-    background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 999px;
-    padding: 8px 16px; font-size: 0.86rem; color: var(--text-primary);
+  .plan.featured { border-color: var(--primary); }
+  .plan .plan-badge {
+    position: absolute; top: -12px; left: 28px; background: var(--primary); color: var(--on-primary);
+    font-size: 0.72rem; font-weight: 700; padding: 4px 12px; border-radius: 999px;
   }
-  .tester-cta {
-    display: inline-block; background: var(--primary); color: var(--on-primary);
-    border-radius: 999px; padding: 14px 32px; font-weight: 700; font-size: 0.95rem;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+  .plan h3 { font-size: 1.3rem; margin: 0 0 14px; }
+  .plan .price { font-family: "Inter", sans-serif; font-size: 2.2rem; font-weight: 800; }
+  .plan .price small { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); }
+  .plan ul { list-style: none; padding: 0; margin: 22px 0 28px; flex: 1; }
+  .plan li { padding: 8px 0; font-size: 0.92rem; color: var(--text-primary); display: flex; gap: 10px; }
+  .plan li::before { content: "✓"; color: var(--primary); font-weight: 800; }
+  .plan-btn {
+    display: block; text-align: center; background: var(--primary); color: var(--on-primary);
+    border-radius: 999px; padding: 14px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.15s ease;
   }
-  .tester-cta:hover { opacity: 0.92; transform: translateY(-1px); }
-  .tester-note { font-size: 0.8rem; color: var(--text-tertiary); margin-top: 14px; }
+  .plan-btn:hover { opacity: 0.92; }
+  .plan .free-note {
+    text-align: center; color: var(--text-tertiary); font-size: 0.86rem; padding: 14px;
+    border: 1px dashed var(--border); border-radius: 999px;
+  }
+  .plans-note { color: var(--text-tertiary); font-size: 0.82rem; line-height: 1.6; margin-top: 24px; max-width: 860px; }
 
   /* ---------- Contact / footer ---------- */
   footer { padding: 64px 0 40px; }
@@ -781,6 +789,7 @@
       <a href="#how-it-works" data-i18n="nav.howItWorks">Cách hoạt động</a>
       <a href="#features" data-i18n="nav.features">Tính năng</a>
       <a href="#mission" data-i18n="nav.mission">Giới thiệu</a>
+      <a href="#pricing" data-i18n="nav.upgrade">Nâng cấp</a>
       <a href="#contact" data-i18n="nav.contact">Hỗ trợ</a>
       <a href="login.html" id="auth-nav-link" data-i18n="nav.login">Đăng nhập</a>
     </nav>
@@ -800,7 +809,6 @@
 <section class="hero">
   <div class="wrap hero-grid">
     <div>
-      <span class="eyebrow fade-in fade-in-1" data-i18n="hero.eyebrow">Huấn luyện viên tư thế bằng AI</span>
       <h1 class="fade-in fade-in-2"><span data-i18n="hero.title.line1">Tập đúng kỹ thuật</span><br/><span class="accent" data-i18n="hero.title.accent">ngay từ lần lặp đầu tiên.</span></h1>
       <p class="lead fade-in fade-in-3" data-i18n="hero.lead">
         PostureX dùng camera điện thoại và trí tuệ nhân tạo để phân tích tư thế
@@ -808,12 +816,6 @@
         nhắc bạn sửa ngay trong lúc tập, như có một huấn luyện viên cá nhân
         luôn đứng cạnh.
       </p>
-      <form class="waitlist-form fade-in fade-in-4" data-waitlist-form data-source="hero" novalidate>
-        <input type="email" data-i18n-placeholder="hero.waitlist.placeholder" placeholder="Nhập email của bạn" required />
-        <button type="submit" data-i18n="hero.waitlist.submit">Đăng ký tải trước</button>
-      </form>
-      <p class="waitlist-msg fade-in fade-in-5" data-waitlist-msg></p>
-      <p class="store-note fade-in fade-in-5" data-i18n="hero.waitlist.note">Để lại email — chúng tôi báo ngay khi PostureX có mặt trên Google Play &amp; App Store.</p>
     </div>
 
     <div class="hero-visual fade-in fade-in-3">
@@ -960,20 +962,37 @@
   </div>
 </section>
 
-<section id="tester">
+<section id="pricing">
   <div class="wrap">
-    <div class="tester-panel reveal">
-      <span class="eyebrow" data-i18n="tester.eyebrow">Chương trình thử nghiệm sớm</span>
-      <h2 data-i18n="tester.title">Dùng thử PostureX trước mọi người</h2>
-      <p data-i18n="tester.body">Trở thành tester để trải nghiệm bản app sớm nhất và góp ý trực tiếp cho đội ngũ phát triển.</p>
-      <div class="tester-benefits">
-        <span data-i18n="tester.benefit1">Dùng bản mới sớm nhất</span>
-        <span data-i18n="tester.benefit2">Góp ý được đội ngũ lắng nghe</span>
-        <span data-i18n="tester.benefit3">Cùng định hình sản phẩm</span>
-      </div>
-      <a href="tester.html" class="tester-cta" data-i18n="tester.cta">Đăng ký làm tester</a>
-      <p class="tester-note" data-i18n="tester.note">Dành cho thiết bị Android, cần tài khoản Google Play.</p>
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n="nav.upgrade">Nâng cấp</span>
+      <h2 data-i18n="upgrade.page.title">Nâng cấp gói</h2>
+      <p data-i18n="upgrade.page.subtitle">Chọn gói phù hợp để mở khoá đầy đủ tính năng PostureX.</p>
     </div>
+    <div class="plans reveal">
+      <div class="plan">
+        <h3>Free</h3>
+        <div class="price">0đ</div>
+        <ul>
+          <li data-i18n="upgrade.free.f1">Phát hiện tư thế cơ bản</li>
+          <li data-i18n="upgrade.free.f2">Tối đa 3 bài tập mỗi ngày</li>
+        </ul>
+        <div class="free-note" data-i18n="upgrade.free.note">Có sẵn cho mọi tài khoản</div>
+      </div>
+      <div class="plan featured">
+        <span class="plan-badge" data-i18n="upgrade.pro.badge">Đầy đủ nhất</span>
+        <h3>Pro</h3>
+        <div class="price">59.000đ<small data-i18n="upgrade.perMonth">/tháng</small></div>
+        <ul>
+          <li data-i18n="upgrade.pro.f1">Toàn bộ bài tập</li>
+          <li data-i18n="upgrade.pro.f2">Lịch sử tập không giới hạn</li>
+          <li data-i18n="upgrade.pro.f3">Chương trình cá nhân hoá bằng AI</li>
+          <li data-i18n="upgrade.pro.f4">Phân tích chuyên sâu</li>
+        </ul>
+        <a class="plan-btn" id="buy-pro" href="checkout.html?plan=pro" data-i18n="upgrade.buy">Mua gói này</a>
+      </div>
+    </div>
+    <p class="plans-note" data-i18n="upgrade.note">Thanh toán bằng chuyển khoản ngân hàng. Gói được kích hoạt sau khi đội ngũ đối chiếu giao dịch.</p>
   </div>
 </section>
 
@@ -1121,6 +1140,19 @@
     });
   })();
 
+  // Bấm "Mua gói này": chưa đăng nhập thì sang trang đăng nhập — trang thanh
+  // toán cần biết tài khoản nào được nâng cấp.
+  document.getElementById("buy-pro").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const target = e.currentTarget.getAttribute("href");
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "include" });
+      window.location.href = res.ok ? target : "login.html";
+    } catch {
+      window.location.href = "login.html";
+    }
+  });
+
   // Đăng ký tải trước (waitlist) — mọi form [data-waitlist-form] trên trang
   document.querySelectorAll("[data-waitlist-form]").forEach((form) => {
     const msgEl = form.parentElement.querySelector("[data-waitlist-msg]");
@@ -1264,7 +1296,6 @@
         `<a class="pd-item" href="account.html" data-i18n="menu.info">${t("menu.info")}</a>`,
         `<a class="pd-item" href="workout-plan.html" data-i18n="menu.plan">${t("menu.plan")}</a>`,
       ];
-      items.push(`<a class="pd-item" href="upgrade.html" data-i18n="menu.upgrade">${t("menu.upgrade")}</a>`);
       if (me.is_admin) {
         // Một mục duy nhất — trang admin có tab chuyển giữa các danh sách.
         items.push(

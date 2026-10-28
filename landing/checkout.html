@@ -214,7 +214,7 @@
 
   const planKey = new URLSearchParams(location.search).get("plan");
   const plan = PLANS[planKey];
-  if (!plan) location.replace("upgrade.html");
+  if (!plan) location.replace("index.html#pricing");
 
   const fmtMoney = (n) => n.toLocaleString("vi-VN") + "đ";
   let me = null;
@@ -288,7 +288,7 @@
     });
   });
 
-  document.getElementById("back-btn").addEventListener("click", () => (location.href = "upgrade.html"));
+  document.getElementById("back-btn").addEventListener("click", () => (location.href = "index.html#pricing"));
 
   document.getElementById("paid-btn").addEventListener("click", async (e) => {
     const btn = e.currentTarget;
