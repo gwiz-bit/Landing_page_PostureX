@@ -5,3 +5,6 @@ backend/**/__pycache__/
 backend/data/
 *.pyc
 .DS_Store
+
+# Bản cài đặt app (APK) đặt ở landing/download/ — nặng hàng chục MB, không đưa vào git
+landing/download/*.apk

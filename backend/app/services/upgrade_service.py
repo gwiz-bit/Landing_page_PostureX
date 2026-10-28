@@ -19,6 +19,9 @@ from app.models.upgrade import STATUS_PAID, UpgradeRequest, utcnow
 # Giá/tháng (VND) theo mã gói. Nguồn duy nhất ở server.
 PLAN_PRICES = {"pro": ("Pro", 59000)}
 PLAN_DAYS = 30
+# Còn bao nhiêu ngày thì được mua tiếp. 0 = khoá việc mua cho tới khi gói HẾT HẠN hẳn
+# (không gia hạn sớm). Muốn cho gia hạn sớm vài ngày cuối thì tăng số này (vd 3).
+RENEW_BEFORE_DAYS = 0
 
 # Mã chỉ gồm chữ + số (không dấu gạch): ngân hàng/SePay hay cắt hoặc đổi ký tự lạ
 # trong nội dung chuyển khoản. Khớp không phân biệt hoa/thường vì app ngân hàng
@@ -166,3 +169,8 @@ async def sync_order_from_gateway(db: AsyncSession, order: UpgradeRequest) -> bo
     await grant_paid(db, order, paid_amount=int(paid))
     logger.info("Đơn %s: SePay báo đã thanh toán — cấp gói cho user %s tới %s", order.transfer_code, order.user_id, order.expires_at)
     return True
+
+
+def can_renew(expiry) -> bool:
+    """Người đang có gói còn hạn `expiry` (hoặc None = đang Free) có được mua tiếp không."""
+    return expiry is None or (expiry - utcnow()) <= timedelta(days=RENEW_BEFORE_DAYS)

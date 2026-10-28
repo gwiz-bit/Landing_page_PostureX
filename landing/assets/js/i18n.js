@@ -28,6 +28,7 @@ const I18N = {
     "upgrade.pro.f4": "Phân tích chuyên sâu",
     "upgrade.pro.badge": "Đầy đủ nhất",
     "upgrade.buy": "Mua gói này",
+    "upgrade.activeUntil": "Bạn đang dùng Pro đến {date}",
     "upgrade.note": "Thanh toán bằng chuyển khoản QR (VietQR). Gói được nâng cấp tự động ngay khi thanh toán thành công.",
     "checkout.title": "Thanh toán",
     "checkout.plan": "Gói",
@@ -37,6 +38,7 @@ const I18N = {
     "checkout.method": "Phương thức",
     "checkout.methodValue": "Chuyển khoản QR (VietQR)",
     "checkout.pay": "Thanh toán bằng VietQR",
+    "checkout.alreadyPro": "Gói Pro của bạn còn hiệu lực đến {date}. Bạn có thể thanh toán lại khi gói hết hạn.",
     "checkout.redirecting": "Đang chuyển sang trang thanh toán...",
     "checkout.secureNote": "Bạn sẽ được chuyển sang trang thanh toán của SePay để quét mã QR bằng app ngân hàng. Gói được nâng cấp tự động ngay khi thanh toán thành công.",
     "checkout.checking": "Đang xác nhận thanh toán...",
@@ -194,8 +196,15 @@ const I18N = {
     // --- index.html: Download ---
     "download.eyebrow": "Sẵn sàng tập đúng cách?",
     "download.title": "Tải PostureX ngay khi ra mắt",
-    "download.body":
-      "Chúng tôi đang trong giai đoạn hoàn thiện cuối cùng trước khi phát hành trên Google Play. Để lại email để nhận thông báo ngay khi app ra mắt.",
+    "download.body": "Chúng tôi đang trong giai đoạn hoàn thiện cuối cùng trước khi phát hành trên Google Play. Để lại email để nhận thông báo ngay khi app ra mắt.",
+    "download.app.eyebrow": "Tải ứng dụng",
+    "download.app.title": "Tải PostureX cho Android",
+    "download.app.body": "Tải bản cài đặt để dùng thử PostureX ngay trên điện thoại Android của bạn.",
+    "download.apk": "Tải file APK cho Android",
+    "download.apkNote": "Phiên bản 1.0.0, dành cho Android 7.0 trở lên. Khi cài, Android có thể hỏi bạn cho phép cài ứng dụng từ nguồn ngoài Google Play.",
+    "download.apkOld": "Điện thoại Android đời cũ (32-bit)? Tải bản này",
+    "download.play": "Tải trên Google Play",
+    "download.playNote": "Cài đặt trực tiếp từ Google Play, tự động cập nhật khi có phiên bản mới.",
 
     // --- index.html: Liên hệ / footer ---
     "contact.eyebrow": "Liên hệ & hỗ trợ",
@@ -362,6 +371,7 @@ const I18N = {
     "upgrade.pro.f4": "In-depth analysis",
     "upgrade.pro.badge": "Most complete",
     "upgrade.buy": "Choose this plan",
+    "upgrade.activeUntil": "You're on Pro until {date}",
     "upgrade.note": "Pay by QR bank transfer (VietQR). Your plan upgrades automatically as soon as the payment succeeds.",
     "checkout.title": "Payment",
     "checkout.plan": "Plan",
@@ -371,6 +381,7 @@ const I18N = {
     "checkout.method": "Payment method",
     "checkout.methodValue": "QR bank transfer (VietQR)",
     "checkout.pay": "Pay with VietQR",
+    "checkout.alreadyPro": "Your Pro plan is active until {date}. You can pay again once it expires.",
     "checkout.redirecting": "Redirecting to the payment page...",
     "checkout.secureNote": "You'll be taken to SePay's payment page to scan a QR code with your banking app. Your plan upgrades automatically as soon as the payment succeeds.",
     "checkout.checking": "Confirming your payment...",
@@ -517,8 +528,15 @@ const I18N = {
 
     "download.eyebrow": "Ready to train the right way?",
     "download.title": "Get PostureX the moment it launches",
-    "download.body":
-      "We're in the final stretch before launching on Google Play. Leave your email to get notified the instant the app goes live.",
+    "download.body": "We're in the final stretch before launching on Google Play. Leave your email to get notified the instant the app goes live.",
+    "download.app.eyebrow": "Get the app",
+    "download.app.title": "Get PostureX for Android",
+    "download.app.body": "Download the installer to try PostureX on your Android phone right now.",
+    "download.apk": "Download the APK for Android",
+    "download.apkNote": "Version 1.0.0, for Android 7.0 and up. When installing, Android may ask you to allow apps from sources outside Google Play.",
+    "download.apkOld": "Older Android phone (32-bit)? Get this build",
+    "download.play": "Get it on Google Play",
+    "download.playNote": "Install straight from Google Play and get updates automatically.",
 
     "contact.eyebrow": "Contact & support",
     "contact.title": "Need help or have feedback for PostureX?",

@@ -23,6 +23,7 @@ from app.services.upgrade_service import (
     PLAN_PRICES,
     active_expiry,
     build_checkout,
+    can_renew,
     gateway_configured,
     sync_order_from_gateway,
 )
@@ -44,6 +45,12 @@ async def start_order(
 
     user_id = int(payload["sub"])
     plan_name, amount = PLAN_PRICES[data.plan]
+
+    # Đang còn hạn thì không cho tạo đơn mới. Chặn ở SERVER (không chỉ ẩn nút) vì ai cũng
+    # gọi thẳng được API. Khách lỡ trả ở đơn đã tạo từ trước vẫn được cấp gói (xem sepay.py).
+    expiry = await active_expiry(db, user_id)
+    if not can_renew(expiry):
+        raise HTTPException(status_code=409, detail={"code": "already_pro", "expires_at": expiry.isoformat()})
 
     # Mỗi lần bấm = một đơn/mã hoá đơn mới (SePay yêu cầu mã hoá đơn duy nhất). Các đơn
     # chờ cũ của người này đóng lại cho danh sách admin gọn — nhưng IPN vẫn cấp gói nếu
@@ -100,4 +107,4 @@ async def my_plan(
     payload: dict = Depends(require_login), db: AsyncSession = Depends(get_db)
 ) -> MyPlanOut:
     expiry = await active_expiry(db, int(payload["sub"]))
-    return MyPlanOut(plan="Pro" if expiry else "Free", expires_at=expiry)
+    return MyPlanOut(plan="Pro" if expiry else "Free", expires_at=expiry, can_renew=can_renew(expiry))

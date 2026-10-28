@@ -25,6 +25,8 @@ class OrderStatusOut(BaseModel):
 class MyPlanOut(BaseModel):
     plan: str  # "Pro" hoặc "Free"
     expires_at: datetime | None
+    # False = đang còn hạn, chưa được mua tiếp (giao diện dùng để khoá nút mua).
+    can_renew: bool
 
 
 class UpgradeEntryOut(BaseModel):

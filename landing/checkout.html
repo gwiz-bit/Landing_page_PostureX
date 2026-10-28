@@ -113,19 +113,34 @@
   const payBtn = document.getElementById("pay-btn");
   const msg = document.getElementById("msg");
   let paying = false;
+  let lockedUntil = null; // ISO hạn Pro hiện tại nếu đang còn hạn
+
+  // Đang còn hạn Pro thì không thanh toán thêm (server cũng chặn).
+  function renderLock() {
+    if (!lockedUntil) return;
+    const iso = lockedUntil.endsWith("Z") ? lockedUntil : lockedUntil + "Z";
+    const date = new Date(iso).toLocaleDateString(getLocale(), { day: "2-digit", month: "2-digit", year: "numeric" });
+    msg.style.color = "var(--text-secondary)";
+    msg.textContent = t("checkout.alreadyPro", { date });
+  }
+  function lockPay(expiresAt) {
+    lockedUntil = expiresAt;
+    payBtn.disabled = true;
+    renderLock();
+  }
 
   document.getElementById("v-amount").textContent = plan ? plan.amount.toLocaleString("vi-VN") + "đ" : "";
 
   function setPayLabel() {
     payBtn.textContent = paying ? t("checkout.redirecting") : t("checkout.pay");
   }
-  document.addEventListener("posturex:langchange", setPayLabel);
+  document.addEventListener("posturex:langchange", () => { setPayLabel(); renderLock(); });
 
   // Quay lại bằng nút Back của trình duyệt từ trang SePay: trang được khôi phục từ bộ nhớ
   // đệm ở trạng thái "đang chuyển trang" — mở khoá nút để người dùng thử lại.
   window.addEventListener("pageshow", () => {
     paying = false;
-    payBtn.disabled = false;
+    payBtn.disabled = !!lockedUntil;
     setPayLabel();
   });
 
@@ -147,6 +162,12 @@
       });
       if (res.status === 401) { location.href = "login.html"; return; }
       const data = await res.json().catch(() => ({}));
+      if (res.status === 409 && data.detail && data.detail.code === "already_pro") {
+        paying = false;
+        setPayLabel();
+        lockPay(data.detail.expires_at);
+        return;
+      }
       if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : t("checkout.error"));
 
       const form = document.createElement("form");
@@ -174,7 +195,12 @@
   (async () => {
     try {
       const res = await fetch("/api/auth/me", { credentials: "include" });
-      if (!res.ok) location.replace("login.html");
+      if (!res.ok) { location.replace("login.html"); return; }
+      const planRes = await fetch("/api/upgrade/me", { credentials: "include" });
+      if (planRes.ok) {
+        const info = await planRes.json();
+        if (!info.can_renew && info.expires_at) lockPay(info.expires_at);
+      }
     } catch {
       location.replace("login.html");
     }

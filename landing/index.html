@@ -708,7 +708,8 @@
   .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
   /* ---------- Bảng gói (Free / Pro) ---------- */
-  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; }
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 860px; margin: 0 auto; }
+  #pricing .section-head { margin-left: auto; margin-right: auto; text-align: center; }
   @media (max-width: 680px) { .plans { grid-template-columns: 1fr; } }
   .plan {
     position: relative; background: var(--surface); border: 1px solid var(--border);
@@ -730,11 +731,30 @@
     border-radius: 999px; padding: 14px; font-weight: 700; font-size: 0.95rem; transition: opacity 0.15s ease;
   }
   .plan-btn:hover { opacity: 0.92; }
+  .plan-btn.locked { background: var(--surface-elevated); color: var(--text-secondary); border: 1px solid var(--border); cursor: default; pointer-events: none; }
   .plan .free-note {
     text-align: center; color: var(--text-tertiary); font-size: 0.86rem; padding: 14px;
     border: 1px dashed var(--border); border-radius: 999px;
   }
-  .plans-note { color: var(--text-tertiary); font-size: 0.82rem; line-height: 1.6; margin-top: 24px; max-width: 860px; }
+  .plans-note { color: var(--text-tertiary); font-size: 0.82rem; line-height: 1.6; margin: 24px auto 0; max-width: 860px; text-align: center; }
+
+  /* ---------- Khu tải app: 2 khối cạnh nhau (tải app + đăng ký tải trước) ---------- */
+  .download-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 860px) { .download-grid { grid-template-columns: 1fr; } }
+  .download-grid .download-panel { padding: 48px 32px; display: flex; flex-direction: column; justify-content: center; }
+  @media (max-width: 620px) { .download-grid .download-panel { padding: 36px 20px; } }
+  .download-grid .download-panel p { margin: 14px auto 28px; }
+  .apk-box { margin: 0 auto; text-align: center; }
+  .download-grid .apk-box .apk-note { margin: 14px auto 0; }
+  .apk-btn {
+    display: inline-block; background: var(--primary); color: var(--on-primary);
+    border-radius: 999px; padding: 15px 36px; font-weight: 700; font-size: 1rem;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .apk-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .apk-note { font-size: 0.82rem; color: var(--text-tertiary); line-height: 1.6; max-width: 52ch; }
+  .apk-alt { display: inline-block; margin-top: 10px; font-size: 0.82rem; color: var(--text-secondary); text-decoration: underline; }
+  .apk-alt:hover { color: var(--text-primary); }
 
   /* ---------- Contact / footer ---------- */
   footer { padding: 64px 0 40px; }
@@ -998,15 +1018,30 @@
 
 <section id="download">
   <div class="wrap">
-    <div class="download-panel reveal">
-      <span class="eyebrow" data-i18n="download.eyebrow">Sẵn sàng tập đúng cách?</span>
-      <h2 data-i18n="download.title">Tải PostureX ngay khi ra mắt</h2>
-      <p data-i18n="download.body">Chúng tôi đang trong giai đoạn hoàn thiện cuối cùng trước khi phát hành trên Google Play. Để lại email để nhận thông báo ngay khi app ra mắt.</p>
-      <form class="waitlist-form" data-waitlist-form data-source="download" novalidate>
-        <input type="email" data-i18n-placeholder="hero.waitlist.placeholder" placeholder="Nhập email của bạn" required />
-        <button type="submit" data-i18n="hero.waitlist.submit">Đăng ký tải trước</button>
-      </form>
-      <p class="waitlist-msg" data-waitlist-msg></p>
+    <div class="download-grid reveal">
+      <!-- Khối 1: tải app. Link nằm ở APP_LINKS trong script cuối trang (khi có link Google Play thì dán vào đó). -->
+      <div class="download-panel">
+        <span class="eyebrow" data-i18n="download.app.eyebrow">Tải ứng dụng</span>
+        <h2 data-i18n="download.app.title">Tải PostureX cho Android</h2>
+        <p data-i18n="download.app.body">Tải bản cài đặt để dùng thử PostureX ngay trên điện thoại Android của bạn.</p>
+        <div class="apk-box" id="apk-box">
+          <a class="apk-btn" id="apk-link" href="download/posturex-latest.apk" download data-i18n="download.apk">Tải file APK cho Android</a>
+          <p class="apk-note"><span id="apk-note" data-i18n="download.apkNote">Phiên bản 1.0.0, dành cho Android 7.0 trở lên.</span> <span id="apk-size"></span></p>
+          <a class="apk-alt" id="apk-alt" href="download/posturex-latest-armv7.apk" download data-i18n="download.apkOld">Điện thoại Android đời cũ (32-bit)? Tải bản này</a>
+        </div>
+      </div>
+
+      <!-- Khối 2: đăng ký tải trước (giữ nguyên như ban đầu) -->
+      <div class="download-panel">
+        <span class="eyebrow" data-i18n="download.eyebrow">Sẵn sàng tập đúng cách?</span>
+        <h2 data-i18n="download.title">Tải PostureX ngay khi ra mắt</h2>
+        <p data-i18n="download.body">Chúng tôi đang trong giai đoạn hoàn thiện cuối cùng trước khi phát hành trên Google Play. Để lại email để nhận thông báo ngay khi app ra mắt.</p>
+        <form class="waitlist-form" data-waitlist-form data-source="download" novalidate>
+          <input type="email" data-i18n-placeholder="hero.waitlist.placeholder" placeholder="Nhập email của bạn" required />
+          <button type="submit" data-i18n="hero.waitlist.submit">Đăng ký tải trước</button>
+        </form>
+        <p class="waitlist-msg" data-waitlist-msg></p>
+      </div>
     </div>
   </div>
 </section>
@@ -1144,6 +1179,7 @@
   // toán cần biết tài khoản nào được nâng cấp.
   document.getElementById("buy-pro").addEventListener("click", async (e) => {
     e.preventDefault();
+    if (e.currentTarget.classList.contains("locked")) return; // đang còn hạn Pro
     const target = e.currentTarget.getAttribute("href");
     try {
       const res = await fetch("/api/auth/me", { credentials: "include" });
@@ -1152,6 +1188,74 @@
       window.location.href = "login.html";
     }
   });
+
+  // ===== Link tải app =====
+  // Hiện dùng file APK tự phát hành. KHI CÓ LINK GOOGLE PLAY CHÍNH THỨC: dán vào `play`
+  // bên dưới — nút tự đổi thành "Tải trên Google Play" và ẩn các link APK, không cần sửa
+  // chỗ nào khác. (Để trống `play` thì dùng APK.)
+  const APP_LINKS = {
+    play: "", // vd "https://play.google.com/store/apps/details?id=com.posturex.app"
+    apk: "download/posturex-latest.apk",
+    apkOld: "download/posturex-latest-armv7.apk", // máy Android 32-bit đời cũ
+  };
+
+  (async () => {
+    const link = document.getElementById("apk-link");
+    const note = document.getElementById("apk-note");
+    const alt = document.getElementById("apk-alt");
+    if (!link) return;
+
+    if (APP_LINKS.play) {
+      link.href = APP_LINKS.play;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.removeAttribute("download");
+      link.setAttribute("data-i18n", "download.play");
+      note.setAttribute("data-i18n", "download.playNote");
+      alt.style.display = "none";
+      applyI18n();
+      return;
+    }
+
+    // Chế độ APK: hiện dung lượng thật của file; ẩn nút nếu file chưa được đặt vào
+    // landing/download/ (tránh nút dẫn tới trang 404).
+    link.href = APP_LINKS.apk;
+    alt.href = APP_LINKS.apkOld;
+    try {
+      const res = await fetch(APP_LINKS.apk, { method: "HEAD" });
+      if (!res.ok) throw new Error("apk missing");
+      const len = Number(res.headers.get("content-length"));
+      if (len > 0) document.getElementById("apk-size").textContent = "(" + (len / 1048576).toFixed(0) + " MB)";
+      const altRes = await fetch(APP_LINKS.apkOld, { method: "HEAD" }).catch(() => null);
+      if (!altRes || !altRes.ok) alt.style.display = "none";
+    } catch {
+      document.getElementById("apk-box").style.display = "none";
+    }
+  })();
+
+  // Người đang còn hạn Pro thì khoá nút mua và cho biết hạn (server cũng chặn, xem
+  // routes/upgrade.py). Hết hạn thì nút mở lại như bình thường.
+  (async () => {
+    const btn = document.getElementById("buy-pro");
+    if (!btn) return;
+    let info = null;
+    try {
+      const res = await fetch("/api/upgrade/me", { credentials: "include" });
+      if (res.ok) info = await res.json();
+    } catch {
+      // chưa đăng nhập hoặc mất mạng — giữ nút như bình thường
+    }
+    if (!info || info.can_renew || !info.expires_at) return;
+    const iso = info.expires_at.endsWith("Z") ? info.expires_at : info.expires_at + "Z";
+    function lock() {
+      const date = new Date(iso).toLocaleDateString(getLocale(), { day: "2-digit", month: "2-digit", year: "numeric" });
+      btn.classList.add("locked");
+      btn.removeAttribute("data-i18n"); // không để applyI18n() ghi đè chữ "Mua gói này"
+      btn.textContent = t("upgrade.activeUntil", { date });
+    }
+    lock();
+    document.addEventListener("posturex:langchange", lock);
+  })();
 
   // Đăng ký tải trước (waitlist) — mọi form [data-waitlist-form] trên trang
   document.querySelectorAll("[data-waitlist-form]").forEach((form) => {
