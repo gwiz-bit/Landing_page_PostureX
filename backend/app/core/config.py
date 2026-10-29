@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     # phạm vi truy cập khác nhau).
     SECRET_KEY: str
     SESSION_COOKIE_NAME: str = "posturex_web_session"
+    # Cookie đăng nhập chỉ gửi qua HTTPS (cờ Secure) — tránh bị đánh cắp trên mạng không
+    # tin cậy. Mặc định BẬT cho bản chạy thật (https://posturex1.com). Chrome/Edge/Firefox
+    # vẫn nhận cookie Secure trên http://localhost; nếu trình duyệt dev nào không nhận
+    # (vd Safari) thì đặt COOKIE_SECURE=False trong .env CỦA MÁY ĐÓ, không đổi mặc định.
+    COOKIE_SECURE: bool = True
     SESSION_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 ngày, khớp thời hạn token app
 
     # Tắt TẠM THỜI sau audit bảo mật (xem lịch sử trò chuyện/commit) — đăng

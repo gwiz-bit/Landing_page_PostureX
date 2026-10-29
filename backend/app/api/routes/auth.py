@@ -53,9 +53,7 @@ def _set_session_cookie(response: Response, profile: dict, backend_access_token:
         httponly=True,
         samesite="lax",
         max_age=settings.SESSION_EXPIRE_MINUTES * 60,
-        # secure=True bị tắt vì chưa có HTTPS lúc code — BẬT LẠI khi deploy
-        # thật lên domain có SSL.
-        secure=False,
+        secure=settings.COOKIE_SECURE,
     )
 
 
@@ -111,7 +109,13 @@ async def login(request: FastAPIRequest, data: LoginRequest, response: Response)
 
 @router.post("/logout")
 async def logout(response: Response) -> dict:
-    response.delete_cookie(settings.SESSION_COOKIE_NAME)
+    # Thuộc tính phải khớp lúc đặt cookie thì trình duyệt mới chắc chắn xoá đúng cookie đó.
+    response.delete_cookie(
+        settings.SESSION_COOKIE_NAME,
+        httponly=True,
+        samesite="lax",
+        secure=settings.COOKIE_SECURE,
+    )
     return {"message": "Đã đăng xuất."}
 
 
