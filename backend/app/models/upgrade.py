@@ -4,13 +4,12 @@ Luồng: người dùng mở trang thanh toán → web tạo 1 đơn `pending` (
 khoản `PX<user_id>PRO`) → người dùng quét QR chuyển khoản → SePay báo về
 webhook → đơn chuyển sang `paid` và gói Pro có hạn `expires_at`.
 
-⚠️ "Gói của người dùng" chỉ tồn tại phía WEB (đọc từ bảng này). Backend app
-đang tắt bán hàng và nhóm chưa cho sửa, nên gói Pro CHƯA mở khoá gì trong app —
-chỉ web ghi nhận ai đã trả tiền, hạn tới khi nào, để admin xem."""
+Sau khi đơn `paid`, web báo sang backend app (`app_synced`) để app ghi gói Pro vào
+UserSubscriptions — xem `services/upgrade_service.py::push_plan_to_app`."""
 
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Integer, String
+from sqlalchemy import Boolean, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -51,3 +50,5 @@ class UpgradeRequest(Base):
     # id giao dịch phía SePay — chống xử lý lặp khi SePay gọi lại webhook.
     # Duy nhất qua unique index tạo trong init_db (ALTER TABLE không thêm được UNIQUE).
     sepay_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Đã báo sang backend app (kích hoạt gói trong app) chưa. False = chưa/đang chờ thử lại.
+    app_synced: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")

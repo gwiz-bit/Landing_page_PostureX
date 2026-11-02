@@ -34,6 +34,7 @@ _ADDED_COLUMNS = {
         "expires_at": "DATETIME",
         "paid_amount": "INTEGER",
         "sepay_id": "INTEGER",
+        "app_synced": "BOOLEAN NOT NULL DEFAULT 0",
     },
 }
 

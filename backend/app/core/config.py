@@ -53,6 +53,11 @@ class Settings(BaseSettings):
     SEPAY_PG_ENV: str = "sandbox"  # "sandbox" hoặc "production"
     PUBLIC_BASE_URL: str = ""
 
+    # Khoá dùng chung với backend app (WEB_ACTIVATION_KEY bên đó) để báo "người dùng đã
+    # trả tiền gói Pro" sang app (POST /internal/web-subscription). Để trống = web không
+    # gọi sang app; đơn vẫn được ghi nhận ở web và sẽ được đồng bộ bù khi có khoá.
+    APP_ACTIVATION_KEY: str = ""
+
     # DB riêng của web — chỉ chứa SupportTickets/Vouchers, KHÔNG có bảng Users.
     DB_HOST: str = "localhost"
     DB_PORT: int = 3306

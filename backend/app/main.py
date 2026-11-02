@@ -7,6 +7,9 @@ services/posturex_client.py), không dùng chung DB.
 
 from pathlib import Path
 
+import asyncio
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
@@ -16,7 +19,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.routes import admin, auth, feedback, profile, sepay, upgrade, waitlist
 from app.core.config import settings
-from app.core.database import init_db
+from app.core.database import AsyncSessionLocal, init_db
 from app.core.errors import friendly_validation_detail
 from app.core.rate_limit import limiter, rate_limit_handler
 
@@ -40,9 +43,22 @@ app.include_router(admin.router)
 app.include_router(profile.router)
 
 
+async def _sync_plans_to_app() -> None:
+    """Bù lại những khoản đã thu mà chưa báo được sang app (app tắt/chưa có khoá lúc đó)."""
+    from app.services.upgrade_service import sync_unsynced_to_app
+
+    try:
+        async with AsyncSessionLocal() as db:
+            await sync_unsynced_to_app(db)
+    except Exception:
+        logging.getLogger(__name__).exception("Đồng bộ gói sang app lúc khởi động lỗi")
+
+
 @app.on_event("startup")
 async def on_startup() -> None:
     await init_db()
+    # Chạy nền: backend app có tắt thì web vẫn khởi động bình thường.
+    asyncio.create_task(_sync_plans_to_app())
 
 
 @app.get("/health")

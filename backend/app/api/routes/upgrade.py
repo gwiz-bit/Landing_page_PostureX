@@ -24,6 +24,7 @@ from app.services.upgrade_service import (
     active_expiry,
     build_checkout,
     can_renew,
+    ensure_synced_to_app,
     gateway_configured,
     sync_order_from_gateway,
 )
@@ -99,6 +100,7 @@ async def order_status(
     # IPN là đường chính, nhưng không phải lúc nào cũng về (Sandbox không phát IPN cho thanh
     # toán giả lập). Chưa thấy "paid" thì hỏi thẳng SePay — chỉ cấp gói khi SePay xác nhận.
     await sync_order_from_gateway(db, order)
+    await ensure_synced_to_app(db, order.user_id)
     return OrderStatusOut(status=order.status, expires_at=order.expires_at)
 
 
@@ -106,5 +108,6 @@ async def order_status(
 async def my_plan(
     payload: dict = Depends(require_login), db: AsyncSession = Depends(get_db)
 ) -> MyPlanOut:
+    await ensure_synced_to_app(db, int(payload["sub"]))
     expiry = await active_expiry(db, int(payload["sub"]))
     return MyPlanOut(plan="Pro" if expiry else "Free", expires_at=expiry, can_renew=can_renew(expiry))

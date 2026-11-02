@@ -740,6 +740,9 @@
 
   /* ---------- Khu tải app: 2 khối cạnh nhau (tải app + đăng ký tải trước) ---------- */
   .download-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  /* đang ẩn khối đăng ký tải trước: chỉ còn khối tải app, đặt giữa */
+  .download-grid .download-panel[hidden] { display: none; }
+  .download-grid { grid-template-columns: 1fr; max-width: 640px; margin: 0 auto; }
   @media (max-width: 860px) { .download-grid { grid-template-columns: 1fr; } }
   .download-grid .download-panel { padding: 48px 32px; display: flex; flex-direction: column; justify-content: center; }
   @media (max-width: 620px) { .download-grid .download-panel { padding: 36px 20px; } }
@@ -994,8 +997,8 @@
         <h3>Free</h3>
         <div class="price">0đ</div>
         <ul>
-          <li data-i18n="upgrade.free.f1">Phát hiện tư thế cơ bản</li>
-          <li data-i18n="upgrade.free.f2">Tối đa 3 bài tập mỗi ngày</li>
+          <li data-i18n="upgrade.free.f1">Toàn bộ tính năng và bài tập của app</li>
+          <li data-i18n="upgrade.free.f2">Không có theo dõi tư thế thời gian thực</li>
         </ul>
         <div class="free-note" data-i18n="upgrade.free.note">Có sẵn cho mọi tài khoản</div>
       </div>
@@ -1004,10 +1007,8 @@
         <h3>Pro</h3>
         <div class="price">59.000đ<small data-i18n="upgrade.perMonth">/tháng</small></div>
         <ul>
-          <li data-i18n="upgrade.pro.f1">Toàn bộ bài tập</li>
-          <li data-i18n="upgrade.pro.f2">Lịch sử tập không giới hạn</li>
-          <li data-i18n="upgrade.pro.f3">Chương trình cá nhân hoá bằng AI</li>
-          <li data-i18n="upgrade.pro.f4">Phân tích chuyên sâu</li>
+          <li data-i18n="upgrade.pro.f1">Tất cả tính năng của gói Free</li>
+          <li data-i18n="upgrade.pro.f2">Theo dõi tư thế thời gian thực bằng AI</li>
         </ul>
         <a class="plan-btn" id="buy-pro" href="checkout.html?plan=pro" data-i18n="upgrade.buy">Mua gói này</a>
       </div>
@@ -1031,8 +1032,9 @@
         </div>
       </div>
 
-      <!-- Khối 2: đăng ký tải trước (giữ nguyên như ban đầu) -->
-      <div class="download-panel">
+      <!-- Khối 2: đăng ký tải trước — ĐANG ẨN (thuộc tính hidden). Muốn hiện lại: xoá "hidden" và
+           bỏ CSS "đang ẩn khối đăng ký" ở trên (.download-grid chỉ còn 1 cột). Backend + trang admin vẫn giữ. -->
+      <div class="download-panel" hidden>
         <span class="eyebrow" data-i18n="download.eyebrow">Sẵn sàng tập đúng cách?</span>
         <h2 data-i18n="download.title">Tải PostureX ngay khi ra mắt</h2>
         <p data-i18n="download.body">Chúng tôi đang trong giai đoạn hoàn thiện cuối cùng trước khi phát hành trên Google Play. Để lại email để nhận thông báo ngay khi app ra mắt.</p>

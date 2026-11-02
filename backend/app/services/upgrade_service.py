@@ -10,7 +10,7 @@ from decimal import Decimal, InvalidOperation
 
 import httpx
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -52,9 +52,16 @@ async def grant_paid(
     order.paid_at = now
     order.expires_at = start + timedelta(days=PLAN_DAYS)
     order.paid_amount = paid_amount
+    order.app_synced = False
     if sepay_id is not None:
         order.sepay_id = sepay_id
     await db.commit()
+    # Báo sang app để mở khoá trong app. Lỗi ở đây KHÔNG được làm hỏng việc ghi nhận tiền
+    # đã thu — đơn vẫn `paid` ở web, cờ app_synced=False để thử lại sau.
+    try:
+        await push_plan_to_app(db, order.user_id)
+    except Exception:
+        logger.exception("Không báo được gói Pro sang app (user %s), sẽ thử lại", order.user_id)
     return order
 
 
@@ -174,3 +181,97 @@ async def sync_order_from_gateway(db: AsyncSession, order: UpgradeRequest) -> bo
 def can_renew(expiry) -> bool:
     """Người đang có gói còn hạn `expiry` (hoặc None = đang Free) có được mua tiếp không."""
     return expiry is None or (expiry - utcnow()) <= timedelta(days=RENEW_BEFORE_DAYS)
+
+
+async def push_plan_to_app(db: AsyncSession, user_id: int) -> bool:
+    """Báo backend app kích hoạt gói Pro cho `user_id`. Trả True nếu app đã ghi nhận.
+
+    Chỉ gửi đơn trả tiền MỚI NHẤT (hạn xa nhất, đã cộng dồn) — app chỉ cần hạn cuối, và
+    gửi đơn cũ sau đơn mới sẽ làm app huỷ nhầm gói mới. App chống lặp theo mã hoá đơn nên
+    gọi lại an toàn. Thành công thì mọi đơn đã trả của người này đều đánh dấu `app_synced`.
+    """
+    if not settings.APP_ACTIVATION_KEY:
+        return False
+    latest = (
+        await db.execute(
+            select(UpgradeRequest)
+            .where(UpgradeRequest.user_id == user_id, UpgradeRequest.status == STATUS_PAID)
+            .order_by(UpgradeRequest.expires_at.desc())
+        )
+    ).scalars().first()
+    if latest is None or latest.expires_at is None:
+        return False
+    if latest.expires_at <= utcnow():
+        # Đã hết hạn: không có gì để mở khoá, chỉ đánh dấu xong.
+        await _mark_synced(db, user_id)
+        return True
+
+    try:
+        async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=15.0) as client:
+            resp = await client.post(
+                "/internal/web-subscription",
+                headers={"X-Web-Key": settings.APP_ACTIVATION_KEY},
+                json={
+                    "user_id": user_id,
+                    "invoice": latest.transfer_code,
+                    "amount": latest.paid_amount if latest.paid_amount is not None else latest.amount,
+                    "end_date": latest.expires_at.date().isoformat(),
+                },
+            )
+    except httpx.HTTPError as e:
+        logger.warning("Backend app không trả lời khi kích hoạt gói (user %s): %s", user_id, e)
+        return False
+    if resp.status_code != 200:
+        logger.warning("Backend app từ chối kích hoạt gói (user %s): %s %s", user_id, resp.status_code, resp.text[:200])
+        return False
+    await _mark_synced(db, user_id)
+    return True
+
+
+async def _mark_synced(db: AsyncSession, user_id: int) -> None:
+    await db.execute(
+        update(UpgradeRequest)
+        .where(UpgradeRequest.user_id == user_id, UpgradeRequest.status == STATUS_PAID)
+        .values(app_synced=True)
+    )
+    await db.commit()
+
+
+async def sync_unsynced_to_app(db: AsyncSession) -> int:
+    """Thử lại mọi người đã trả tiền mà chưa báo được sang app. Trả về số người đã báo xong."""
+    if not settings.APP_ACTIVATION_KEY:
+        return 0
+    user_ids = (
+        await db.execute(
+            select(UpgradeRequest.user_id)
+            .where(UpgradeRequest.status == STATUS_PAID, UpgradeRequest.app_synced.is_(False))
+            .distinct()
+        )
+    ).scalars().all()
+    done = 0
+    for uid in user_ids:
+        try:
+            if await push_plan_to_app(db, uid):
+                done += 1
+        except Exception:
+            logger.exception("Đồng bộ gói sang app lỗi (user %s)", uid)
+    return done
+
+
+async def ensure_synced_to_app(db: AsyncSession, user_id: int) -> None:
+    """Nếu người này có đơn đã trả mà app chưa biết thì thử báo lại (không ném lỗi)."""
+    if not settings.APP_ACTIVATION_KEY:
+        return
+    pending = await db.scalar(
+        select(func.count()).select_from(UpgradeRequest).where(
+            UpgradeRequest.user_id == user_id,
+            UpgradeRequest.status == STATUS_PAID,
+            UpgradeRequest.app_synced.is_(False),
+        )
+    )
+    if not pending:
+        return
+    try:
+        await push_plan_to_app(db, user_id)
+    except Exception:
+        logger.exception("Đồng bộ gói sang app lỗi (user %s)", user_id)
