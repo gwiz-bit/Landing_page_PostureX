@@ -9,6 +9,7 @@ thật duy nhất về tài khoản luôn là backend app.
 import httpx
 
 from app.core.config import settings
+from app.core.errors import friendly_validation_detail
 
 
 class PostureXAuthError(Exception):
@@ -148,7 +149,47 @@ async def list_exercises() -> list[dict]:
 
 
 def _extract_detail(response: httpx.Response) -> str:
+    """Câu lỗi dạng CHUỖI từ phản hồi của backend app.
+
+    Với lỗi 422 (kiểm tra dữ liệu, vd mật khẩu quá yếu) app trả `detail` là danh sách đối
+    tượng — chuyển thành câu tiếng Việt để trang web không hiện "[object Object]".
+    """
     try:
-        return response.json().get("detail", "Đăng nhập thất bại.")
-    except ValueError:
+        detail = response.json().get("detail", "Đăng nhập thất bại.")
+    except (ValueError, AttributeError):
         return "Đăng nhập thất bại."
+    if isinstance(detail, str):
+        return detail
+    return friendly_validation_detail(detail)
+
+
+async def admin_list_users(access_token: str) -> list[dict]:
+    """Proxy GET /admin/users (chỉ admin) — app phân trang bằng skip/limit nên lấy lần lượt
+    từng trang cho tới khi hết."""
+    headers = {"Authorization": f"Bearer {access_token}"}
+    page = 100
+    users: list[dict] = []
+    async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
+        while True:
+            resp = await client.get(
+                "/admin/users", params={"skip": len(users), "limit": page}, headers=headers
+            )
+            if resp.status_code != 200:
+                raise PostureXAuthError(resp.status_code, _extract_detail(resp))
+            batch = resp.json()
+            users.extend(batch)
+            if len(batch) < page:
+                return users
+
+
+async def admin_set_user_admin(access_token: str, user_id: int, is_admin: bool) -> dict:
+    """Proxy PATCH /admin/users/{id} — cấp/thu quyền admin của một tài khoản."""
+    async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
+        resp = await client.patch(
+            f"/admin/users/{user_id}",
+            json={"is_admin": is_admin},
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if resp.status_code != 200:
+            raise PostureXAuthError(resp.status_code, _extract_detail(resp))
+        return resp.json()

@@ -8,6 +8,7 @@ services/posturex_client.py), không dùng chung DB.
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
@@ -16,11 +17,19 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.api.routes import admin, auth, feedback, profile, sepay, upgrade, waitlist
 from app.core.config import settings
 from app.core.database import init_db
+from app.core.errors import friendly_validation_detail
 from app.core.rate_limit import limiter, rate_limit_handler
 
 app = FastAPI(title=settings.APP_NAME)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+    """422 trả `detail` là MỘT CHUỖI (không phải danh sách) — các trang đọc `data.detail`
+    như chuỗi, để nguyên danh sách thì người dùng thấy "[object Object]"."""
+    return JSONResponse(status_code=422, content={"detail": friendly_validation_detail(exc.errors())})
 
 app.include_router(auth.router)
 app.include_router(waitlist.router)

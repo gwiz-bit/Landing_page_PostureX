@@ -104,6 +104,7 @@
     display: none; background: var(--danger-muted); color: var(--danger);
     border-radius: 10px; padding: 10px 14px; font-size: 0.86rem; margin-top: 18px;
   }
+  .field-hint { color: var(--text-tertiary); font-size: 0.78rem; line-height: 1.5; margin: 6px 0 0; }
   .hint { text-align: center; color: var(--text-tertiary); font-size: 0.82rem; margin-top: 22px; line-height: 1.6; }
   .step { display: none; }
   .step.active { display: block; }
@@ -141,9 +142,10 @@
       <label for="email" data-i18n="register.emailLabel">Email</label>
       <input type="email" id="email" required />
       <label for="password" data-i18n="register.passwordLabel">Mật khẩu</label>
-      <input type="password" id="password" minlength="6" required />
+      <input type="password" id="password" minlength="8" required />
+      <p class="field-hint" data-i18n="register.passwordHint">Ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</p>
       <label for="password-confirm" data-i18n="register.passwordConfirmLabel">Nhập lại mật khẩu</label>
-      <input type="password" id="password-confirm" minlength="6" required />
+      <input type="password" id="password-confirm" minlength="8" required />
       <div class="error" id="error-1"></div>
       <div class="btn-row">
         <button type="submit" class="submit" id="submit-1" data-i18n="register.continue">Tiếp tục</button>
@@ -274,6 +276,10 @@
     document.getElementById("progress-fill").style.width = `${((index + 1) / 4) * 100}%`;
   }
 
+  function isStrongPassword(pw) {
+    return pw.length >= 8 && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
+  }
+
   function showError(stepErrorId, message) {
     const box = document.getElementById(stepErrorId);
     box.textContent = message;
@@ -354,6 +360,11 @@
 
     if (password !== confirm) {
       showError("error-1", t("register.passwordMismatch"));
+      return;
+    }
+    // Cùng quy tắc với backend app (app/schemas/validators.py) — báo ngay, khỏi chờ server.
+    if (!isStrongPassword(password)) {
+      showError("error-1", t("register.passwordWeak"));
       return;
     }
 
