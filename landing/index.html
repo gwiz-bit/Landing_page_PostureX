@@ -210,6 +210,10 @@
     .profile-dropdown { position: static; transform: none; padding-top: 0; }
     .pd-box { border: none; box-shadow: none; background: transparent; padding: 0 0 0 12px; }
     nav.links a.pd-item { border-bottom: none; padding: 12px 20px; }
+    /* "Hồ sơ" nằm trong thẻ bọc .profile-menu nên là link dòng (inline) — padding trên/dưới
+       không có tác dụng, vùng bấm co lại còn một dòng chữ. Cho thành khối như các link khác. */
+    .profile-menu > a { display: block; }
+    .profile-menu { border-bottom: none; }
   }
 
   .menu-toggle {
@@ -245,6 +249,8 @@
       box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
     }
     nav.links.open { display: flex; }
+    /* Menu dài (có menu con của "Hồ sơ") thì cuộn được, không tràn khỏi màn hình điện thoại */
+    nav.links { max-height: calc(100vh - 90px); overflow-y: auto; }
     nav.links a {
       padding: 14px 20px;
       border-bottom: 1px solid var(--border);
@@ -1128,7 +1134,17 @@
     setMenuOpen(!navLinksEl.classList.contains("open"));
   });
   navLinksEl.querySelectorAll("a").forEach((a) => {
-    a.addEventListener("click", () => setMenuOpen(false));
+    a.addEventListener("click", () => {
+      // "Hồ sơ" (đã đăng nhập) chỉ MỞ menu con trên điện thoại — đừng đóng cả menu chính,
+      // nếu không các mục con (Thông tin/Lịch tập/Danh sách) bị ẩn theo và không bấm được.
+      if (a.id === "auth-nav-link" && a.parentElement.classList.contains("profile-menu")) return;
+      setMenuOpen(false);
+    });
+  });
+  // Mục con của menu "Hồ sơ" được tạo SAU (khi biết đã đăng nhập) nên không có listener ở trên:
+  // bấm xong thì đóng menu chính (trang đích mở ngay, nhưng #anchor/quay lại vẫn gọn).
+  navLinksEl.addEventListener("click", (e) => {
+    if (e.target.closest("a.pd-item")) setMenuOpen(false);
   });
 
   // Góp ý của người dùng — POST /api/feedback, admin xem ở admin-feedback.html
