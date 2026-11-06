@@ -8,21 +8,25 @@ from fastapi import APIRouter, HTTPException, Response
 from fastapi import Request as FastAPIRequest
 
 from app.core.config import settings
-from app.core.rate_limit import limiter
+from app.core.rate_limit import consume_quota, ensure_quota, limiter
 from app.core.security import create_session_token, decode_session_token
 from app.schemas.auth import (
+    ForgotPasswordRequest,
     LoginRequest,
     MessageResponse,
     RegisterRequest,
     ResendOtpRequest,
+    ResetPasswordRequest,
     UserProfileOut,
     VerifyOtpRequest,
 )
 from app.services.posturex_client import (
     PostureXAuthError,
+    forgot_password as request_password_reset,
     login_and_fetch_profile,
     register as register_user,
     resend_otp as resend_otp_code,
+    reset_password as reset_password_with_token,
     verify_otp_and_fetch_profile,
 )
 
@@ -57,14 +61,24 @@ def _set_session_cookie(response: Response, profile: dict, backend_access_token:
     )
 
 
+# Hai hạn mức cho đăng ký, cùng theo IP:
+# - mọi lượt gửi (kể cả lượt bị app từ chối: email đã dùng, mật khẩu yếu...) — chỉ để chặn spam;
+# - lượt đăng ký THÀNH CÔNG (mỗi lượt tạo tài khoản + gửi 1 email OTP) — mức chặt hơn.
+# Trước 06/11 chỉ có "5/hour" cho mọi lượt → người dùng nhập sai vài lần là bị khoá cả giờ.
+_REGISTER_ATTEMPTS_LIMIT = "30/hour"
+_REGISTER_SUCCESS_LIMIT = "10/hour"
+
+
 @router.post("/register", response_model=MessageResponse)
-@limiter.limit("5/hour")
+@limiter.limit(_REGISTER_ATTEMPTS_LIMIT)
 async def register(request: FastAPIRequest, data: RegisterRequest) -> MessageResponse:
     _require_registration_enabled()
+    ensure_quota(request, _REGISTER_SUCCESS_LIMIT, "register-success")
     try:
         await register_user(data.email, data.password, data.full_name)
     except PostureXAuthError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
+    consume_quota(request, _REGISTER_SUCCESS_LIMIT, "register-success")
     return MessageResponse(
         message="Đã gửi mã OTP xác thực tới email. Vui lòng kiểm tra hộp thư."
     )
@@ -93,6 +107,36 @@ async def resend_otp_endpoint(request: FastAPIRequest, data: ResendOtpRequest) -
     except PostureXAuthError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
     return MessageResponse(message=message)
+
+
+@router.post("/forgot-password", response_model=MessageResponse)
+@limiter.limit("5/hour")
+async def forgot_password_endpoint(
+    request: FastAPIRequest, data: ForgotPasswordRequest
+) -> MessageResponse:
+    """Gửi mã đặt lại mật khẩu qua email (proxy sang app). Không phụ thuộc
+    REGISTRATION_ENABLED — người đã có tài khoản luôn phải lấy lại được mật khẩu."""
+    try:
+        message = await request_password_reset(data.email)
+    except PostureXAuthError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    return MessageResponse(
+        message=message or "Nếu email tồn tại, mã đặt lại mật khẩu đã được gửi tới hộp thư của bạn."
+    )
+
+
+@router.post("/reset-password", response_model=MessageResponse)
+@limiter.limit("10/hour")
+async def reset_password_endpoint(
+    request: FastAPIRequest, data: ResetPasswordRequest
+) -> MessageResponse:
+    try:
+        message = await reset_password_with_token(
+            data.token.strip(), data.new_password, data.confirm_password
+        )
+    except PostureXAuthError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    return MessageResponse(message=message or "Mật khẩu đã được đặt lại thành công.")
 
 
 @router.post("/login", response_model=UserProfileOut)

@@ -68,6 +68,33 @@ async def resend_otp(email: str) -> str:
         return resp.json().get("message", "Đã gửi lại mã OTP.")
 
 
+async def forgot_password(email: str) -> str:
+    """Proxy POST /auth/forgot-password — app gửi email chứa MÃ đặt lại mật khẩu (hiệu lực
+    30 phút, dán tay, không phải link). App luôn trả cùng một câu dù email có tồn tại hay
+    không (chống dò email) — web chuyển nguyên câu đó."""
+    async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
+        resp = await client.post("/auth/forgot-password", json={"email": email})
+        if resp.status_code != 200:
+            raise PostureXAuthError(resp.status_code, _extract_detail(resp))
+        return resp.json().get("message", "")
+
+
+async def reset_password(token: str, new_password: str, confirm_password: str) -> str:
+    """Proxy POST /auth/reset-password — đặt mật khẩu mới bằng mã nhận qua email."""
+    async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
+        resp = await client.post(
+            "/auth/reset-password",
+            json={
+                "token": token,
+                "new_password": new_password,
+                "confirm_password": confirm_password,
+            },
+        )
+        if resp.status_code != 200:
+            raise PostureXAuthError(resp.status_code, _extract_detail(resp))
+        return resp.json().get("message", "")
+
+
 async def login_and_fetch_profile(email: str, password: str) -> tuple[dict, str]:
     """Đăng nhập bằng /auth/login rồi lấy thông tin qua /users/me.
 

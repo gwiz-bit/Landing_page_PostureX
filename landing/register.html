@@ -214,6 +214,7 @@
     <p class="subtitle" data-i18n="register.step4.subtitle">Chọn càng chi tiết, lịch tập sinh ra càng sát với bạn.</p>
     <form id="form-4">
       <label data-i18n="register.workoutDaysLabel">Ngày tập trong tuần</label>
+      <p class="field-hint" id="workout-days-count"></p>
       <div class="chip-group" id="chips-workout-days"></div>
 
       <label data-i18n="register.focusAreasLabel">Nhóm cơ trọng tâm</label>
@@ -315,7 +316,9 @@
     });
   }
 
-  function renderMultiSelectChips(containerId, options, selectedSet) {
+  // getMax (tuỳ chọn): trả về số lựa chọn tối đa — đủ rồi thì bấm thêm không có tác dụng,
+  // giống WorkoutDaysStep (maxSelection) bên app. onChange gọi sau mỗi lần đổi lựa chọn.
+  function renderMultiSelectChips(containerId, options, selectedSet, getMax, onChange) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
     options.forEach((opt) => {
@@ -328,13 +331,32 @@
           selectedSet.delete(opt);
           btn.classList.remove("selected");
         } else {
+          const max = getMax ? getMax() : null;
+          if (max != null && selectedSet.size >= max) return;
           selectedSet.add(opt);
           btn.classList.add("selected");
         }
+        if (onChange) onChange();
       });
       container.appendChild(btn);
     });
   }
+
+  // Dòng "Chọn N ngày (x/N)" — N là "Buổi tập/tuần" ở bước 3 (app: WorkoutDaysStep).
+  function renderWorkoutDaysCount() {
+    const el = document.getElementById("workout-days-count");
+    if (!state.weeklyGoal) {
+      el.textContent = "";
+      return;
+    }
+    el.textContent = t("register.workoutDaysCount", {
+      n: state.weeklyGoal,
+      count: state.workoutDays.size,
+      max: state.weeklyGoal,
+    });
+    el.style.color = state.workoutDays.size === state.weeklyGoal ? "var(--primary)" : "";
+  }
+  document.addEventListener("posturex:langchange", renderWorkoutDaysCount);
 
   renderSingleSelectChips("chips-gender", ["Male", "Female", "Other"], (v) => (state.gender = v));
   renderSingleSelectChips(
@@ -342,7 +364,13 @@
     ["Beginner", "Intermediate", "Advanced"],
     (v) => (state.fitnessLevel = v)
   );
-  renderMultiSelectChips("chips-workout-days", WEEKDAY_LABELS, state.workoutDays);
+  renderMultiSelectChips(
+    "chips-workout-days",
+    WEEKDAY_LABELS,
+    state.workoutDays,
+    () => state.weeklyGoal,
+    renderWorkoutDaysCount
+  );
   renderMultiSelectChips("chips-focus-areas", OnboardingOptions.focusAreas, state.focusAreas);
   renderMultiSelectChips("chips-equipment", OnboardingOptions.equipment, state.equipment);
   renderMultiSelectChips("chips-goals", OnboardingOptions.goals, state.goals);
@@ -441,6 +469,17 @@
     state.weightKg = Number(document.getElementById("weight").value);
     state.weeklyGoal = Number(document.getElementById("weekly-goal").value);
 
+    // Phòng khi số buổi/tuần bị giảm sau khi đã chọn ngày: bỏ bớt ngày thừa (từ cuối tuần
+    // trở lại) để không vượt quá số buổi.
+    if (state.workoutDays.size > state.weeklyGoal) {
+      const keep = WEEKDAY_LABELS.filter((d) => state.workoutDays.has(d)).slice(0, state.weeklyGoal);
+      state.workoutDays.clear();
+      keep.forEach((d) => state.workoutDays.add(d));
+      document.querySelectorAll("#chips-workout-days .chip").forEach((c) => {
+        c.classList.toggle("selected", state.workoutDays.has(c.textContent));
+      });
+    }
+    renderWorkoutDaysCount();
     goToStep(3);
   });
 
@@ -448,6 +487,10 @@
   document.getElementById("form-4").addEventListener("submit", async (e) => {
     e.preventDefault();
     hideError("error-4");
+    // App khoá nút Finish khi số ngày đã chọn khác "Buổi tập/tuần" (WorkoutDaysStep.canFinish).
+    if (state.workoutDays.size !== state.weeklyGoal) {
+      return showError("error-4", t("register.workoutDaysExact", { n: state.weeklyGoal }));
+    }
     setSubmitting("submit-4", true);
 
     try {

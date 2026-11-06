@@ -1030,7 +1030,7 @@
       <div class="download-panel">
         <span class="eyebrow" data-i18n="download.app.eyebrow">Tải ứng dụng</span>
         <h2 data-i18n="download.app.title">Tải PostureX cho Android</h2>
-        <p data-i18n="download.app.body">Tải bản cài đặt để dùng thử PostureX ngay trên điện thoại Android của bạn.</p>
+        <p data-i18n="download.app.body">Cài PostureX để dùng ngay trên điện thoại Android của bạn.</p>
         <div class="apk-box" id="apk-box">
           <a class="apk-btn" id="apk-link" href="download/posturex-latest.apk" download data-i18n="download.apk">Tải file APK cho Android</a>
           <p class="apk-note"><span id="apk-note" data-i18n="download.apkNote">Phiên bản 1.0.0, dành cho Android 7.0 trở lên.</span> <span id="apk-size"></span></p>
@@ -1212,7 +1212,7 @@
   // bên dưới — nút tự đổi thành "Tải trên Google Play" và ẩn các link APK, không cần sửa
   // chỗ nào khác. (Để trống `play` thì dùng APK.)
   const APP_LINKS = {
-    play: "", // vd "https://play.google.com/store/apps/details?id=com.posturex.app"
+    play: "https://play.google.com/store/apps/details?id=com.posturex.app", // có link Play thì nút APK tự ẩn
     apk: "download/posturex-latest.apk",
     apkOld: "download/posturex-latest-armv7.apk", // máy Android 32-bit đời cũ
   };

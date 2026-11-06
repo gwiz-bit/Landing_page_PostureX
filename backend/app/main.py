@@ -89,7 +89,11 @@ async def not_found_handler(request: Request, exc: StarletteHTTPException):
         not_found_file = _LANDING_DIR / "not-found.html"
         if not_found_file.exists():
             return FileResponse(not_found_file, status_code=404)
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=getattr(exc, "headers", None),  # giữ Retry-After của lỗi 429 (rate_limit.ensure_quota)
+    )
 
 
 # Mount PHẢI đứng SAU mọi route khác — Starlette khớp theo đúng thứ tự đăng

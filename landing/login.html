@@ -138,6 +138,15 @@
     font-size: 0.86rem;
     margin-top: 18px;
   }
+  .forgot-link {
+    display: block;
+    width: fit-content;
+    margin: 8px 0 0 auto;
+    font-size: 0.82rem;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .forgot-link:hover { text-decoration: underline; }
   .hint {
     text-align: center;
     color: var(--text-tertiary);
@@ -175,6 +184,7 @@
 
     <label for="password" data-i18n="login.passwordLabel">Mật khẩu</label>
     <input type="password" id="password" name="password" autocomplete="current-password" required />
+    <a href="forgot-password.html" class="forgot-link" data-i18n="login.forgotPassword">Quên mật khẩu?</a>
 
     <div class="error" id="error-box"></div>
 
@@ -218,7 +228,7 @@
       errorBox.textContent = err.message;
       errorBox.style.display = "block";
       submitBtn.disabled = false;
-      submitBtn.textContent = "Đăng nhập";
+      submitBtn.textContent = t("login.submit");
     }
   });
 </script>
