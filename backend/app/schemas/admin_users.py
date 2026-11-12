@@ -22,3 +22,8 @@ class AdminUserListOut(BaseModel):
 
 class AdminRoleIn(BaseModel):
     is_admin: bool
+
+
+class EmailAnnouncementOut(BaseModel):
+    sent: int
+    failed: int

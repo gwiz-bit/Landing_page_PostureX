@@ -153,6 +153,7 @@
       <span class="count-badge"><span data-i18n="admin.total">Tổng cộng</span> <b id="total-count">0</b></span>
       <input class="search" id="search" type="search" data-i18n-placeholder="admin.users.search" placeholder="Tìm theo email hoặc tên..." />
       <button class="export" id="export-btn" data-i18n="admin.export">Xuất CSV</button>
+      <button class="export" id="play-store-email-btn" data-i18n="admin.users.playStoreEmail">Gửi email: App đã có trên Google Play</button>
     </div>
     <div class="card">
       <table>
@@ -267,6 +268,28 @@
     URL.revokeObjectURL(url);
   }
   document.getElementById("export-btn").addEventListener("click", downloadCsv);
+
+  document.getElementById("play-store-email-btn").addEventListener("click", async (ev) => {
+    const btn = ev.target;
+    if (!confirm(t("admin.users.confirmPlayStoreEmail", { count: allUsers.length }))) return;
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = t("admin.users.sendingEmail");
+    try {
+      const res = await fetch("/api/admin/users/play-store-email", {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : t("admin.users.actionError"));
+      alert(t("admin.users.playStoreEmailResult", { sent: data.sent, failed: data.failed }));
+    } catch (err) {
+      alert(err.message || t("admin.users.actionError"));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  });
 
   (async () => {
     const loading = document.getElementById("loading");

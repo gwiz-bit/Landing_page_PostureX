@@ -17,8 +17,13 @@ from app.models.upgrade import STATUS_PAID, STATUS_PENDING, UpgradeRequest, utcn
 from app.services.upgrade_service import grant_paid
 from app.models.waitlist import WaitlistSignup
 from app.schemas.admin import FeedbackListOut, WaitlistListOut
-from app.schemas.admin_users import AdminRoleIn, AdminUserEntry, AdminUserListOut
-from app.services.posturex_client import PostureXAuthError, admin_list_users, admin_set_user_admin
+from app.schemas.admin_users import AdminRoleIn, AdminUserEntry, AdminUserListOut, EmailAnnouncementOut
+from app.services.posturex_client import (
+    PostureXAuthError,
+    admin_list_users,
+    admin_send_play_store_email,
+    admin_set_user_admin,
+)
 from app.schemas.upgrade import UpgradeEntryOut, UpgradeListOut, UpgradeStatusIn
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -129,3 +134,14 @@ async def set_user_role(
     except PostureXAuthError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
     return _user_entry(user, await _pro_expiries(db))
+
+
+@router.post("/users/play-store-email", response_model=EmailAnnouncementOut)
+async def send_play_store_email(admin: dict = Depends(require_admin)) -> EmailAnnouncementOut:
+    """Gửi email thông báo "app đã có trên Google Play" cho mọi user active —
+    proxy thẳng sang backend app (nơi giữ SMTP thật)."""
+    try:
+        result = await admin_send_play_store_email(admin["backend_access_token"])
+    except PostureXAuthError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    return EmailAnnouncementOut(**result)
