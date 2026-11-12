@@ -26,8 +26,10 @@ class ForgotPasswordRequest(BaseModel):
 
 
 class ResetPasswordRequest(BaseModel):
-    # Độ mạnh mật khẩu do backend app kiểm tra (validate_password_strength) — web chỉ chuyển tiếp.
-    token: str = Field(min_length=1, max_length=200)
+    # Từ 12/11/2026 app dùng email + mã 6 số (hiệu lực 5 phút, sai 10 lần thì huỷ mã) thay cho
+    # token dài. Độ mạnh mật khẩu và việc chấm mã do backend app làm — web chỉ chuyển tiếp.
+    email: EmailStr
+    code: str = Field(pattern=r"^\s*\d{6}\s*$")
     new_password: str = Field(max_length=200)
     confirm_password: str = Field(max_length=200)
 

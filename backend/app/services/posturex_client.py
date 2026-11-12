@@ -69,8 +69,8 @@ async def resend_otp(email: str) -> str:
 
 
 async def forgot_password(email: str) -> str:
-    """Proxy POST /auth/forgot-password — app gửi email chứa MÃ đặt lại mật khẩu (hiệu lực
-    30 phút, dán tay, không phải link). App luôn trả cùng một câu dù email có tồn tại hay
+    """Proxy POST /auth/forgot-password — app gửi email chứa MÃ 6 SỐ đặt lại mật khẩu (hiệu
+    lực 5 phút, nhập sai 10 lần thì huỷ). App luôn trả cùng một câu dù email có tồn tại hay
     không (chống dò email) — web chuyển nguyên câu đó."""
     async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
         resp = await client.post("/auth/forgot-password", json={"email": email})
@@ -79,13 +79,14 @@ async def forgot_password(email: str) -> str:
         return resp.json().get("message", "")
 
 
-async def reset_password(token: str, new_password: str, confirm_password: str) -> str:
-    """Proxy POST /auth/reset-password — đặt mật khẩu mới bằng mã nhận qua email."""
+async def reset_password(email: str, code: str, new_password: str, confirm_password: str) -> str:
+    """Proxy POST /auth/reset-password — đặt mật khẩu mới bằng email + mã 6 số nhận qua email."""
     async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=20.0) as client:
         resp = await client.post(
             "/auth/reset-password",
             json={
-                "token": token,
+                "email": email,
+                "code": code,
                 "new_password": new_password,
                 "confirm_password": confirm_password,
             },
