@@ -181,15 +181,6 @@
     return d.toLocaleDateString(getLocale(), { dateStyle: "short" });
   }
 
-  // Ngày (YYYY-MM-DD) theo giờ của máy đang xem, cho file CSV. App lưu giờ UTC nên KHÔNG
-  // được cắt thẳng 10 ký tự đầu: 2026-11-03T18:07 UTC là ngày 04/11 ở Việt Nam.
-  function csvDate(iso) {
-    if (!iso) return "";
-    const d = new Date(iso + (iso.endsWith("Z") ? "" : "Z"));
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  }
-
   function escapeHtml(s) {
     return String(s ?? "").replace(/[&<>"']/g, (c) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -265,7 +256,7 @@
   function downloadCsv() {
     const header = "email,full_name,role,plan,pro_expires_at,created_at\n";
     const body = filtered()
-      .map((u) => [u.email, u.full_name, u.is_admin ? "admin" : "user", u.plan, u.pro_expires_at, csvDate(u.created_at)].map(csvCell).join(","))
+      .map((u) => [u.email, u.full_name, u.is_admin ? "admin" : "user", u.plan, u.pro_expires_at, u.created_at].map(csvCell).join(","))
       .join("\n");
     const blob = new Blob(["\ufeff" + header + body], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);

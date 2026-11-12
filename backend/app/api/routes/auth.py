@@ -132,7 +132,7 @@ async def reset_password_endpoint(
 ) -> MessageResponse:
     try:
         message = await reset_password_with_token(
-            data.email, data.code.strip(), data.new_password, data.confirm_password
+            data.token.strip(), data.new_password, data.confirm_password
         )
     except PostureXAuthError as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
