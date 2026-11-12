@@ -256,7 +256,7 @@
   function downloadCsv() {
     const header = "email,full_name,role,plan,pro_expires_at,created_at\n";
     const body = filtered()
-      .map((u) => [u.email, u.full_name, u.is_admin ? "admin" : "user", u.plan, u.pro_expires_at, u.created_at].map(csvCell).join(","))
+      .map((u) => [u.email, u.full_name, u.is_admin ? "admin" : "user", u.plan, u.pro_expires_at, formatDate(u.created_at)].map(csvCell).join(","))
       .join("\n");
     const blob = new Blob(["\ufeff" + header + body], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
