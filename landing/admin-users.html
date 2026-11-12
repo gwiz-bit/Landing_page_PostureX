@@ -153,12 +153,14 @@
       <span class="count-badge"><span data-i18n="admin.total">Tổng cộng</span> <b id="total-count">0</b></span>
       <input class="search" id="search" type="search" data-i18n-placeholder="admin.users.search" placeholder="Tìm theo email hoặc tên..." />
       <button class="export" id="export-btn" data-i18n="admin.export">Xuất CSV</button>
-      <button class="export" id="play-store-email-btn" data-i18n="admin.users.playStoreEmail">Gửi email: App đã có trên Google Play</button>
+      <span class="count-badge" id="selected-badge">0</span>
+      <button class="export" id="play-store-email-btn" data-i18n="admin.users.playStoreEmail" disabled>Gửi email: App đã có trên Google Play</button>
     </div>
     <div class="card">
       <table>
         <thead>
           <tr>
+            <th style="width:36px;"><input type="checkbox" id="select-all" /></th>
             <th data-i18n="admin.users.colUser">Tài khoản</th>
             <th data-i18n="admin.users.colRole">Quyền</th>
             <th data-i18n="admin.users.colPlan">Gói</th>
@@ -176,6 +178,18 @@
 <script>
   let allUsers = [];
   let myId = null;
+  const selectedIds = new Set();
+
+  function updateEmailBtnState() {
+    const btn = document.getElementById("play-store-email-btn");
+    const badge = document.getElementById("selected-badge");
+    const n = selectedIds.size;
+    btn.disabled = n === 0;
+    badge.textContent = t("admin.users.selectedCount", { count: n });
+    const list = filtered();
+    const selectAll = document.getElementById("select-all");
+    selectAll.checked = list.length > 0 && list.every((u) => selectedIds.has(u.id));
+  }
 
   function formatDate(iso) {
     const d = new Date(iso + (iso.endsWith("Z") ? "" : "Z"));
@@ -210,6 +224,7 @@
         ? `<span class="you">${t("admin.users.you")}</span>`
         : `<div class="row-actions"><button class="${u.is_admin ? "no" : "ok"}" data-id="${u.id}" data-grant="${u.is_admin ? "0" : "1"}">${t(u.is_admin ? "admin.users.revoke" : "admin.users.grant")}</button></div>`;
       return `<tr>
+        <td><input type="checkbox" class="select-row" data-id="${u.id}" ${selectedIds.has(u.id) ? "checked" : ""} /></td>
         <td>${escapeHtml(u.full_name || "")}<div style="color:var(--text-secondary);font-size:0.82rem;">${escapeHtml(u.email)}</div></td>
         <td>${roleBadge}</td>
         <td>${planBadge}</td>
@@ -217,9 +232,24 @@
         <td>${action}</td>
       </tr>`;
     }).join("");
+    updateEmailBtnState();
   }
 
   document.getElementById("search").addEventListener("input", render);
+
+  document.getElementById("rows").addEventListener("change", (ev) => {
+    const cb = ev.target.closest("input.select-row");
+    if (!cb) return;
+    const id = Number(cb.dataset.id);
+    if (cb.checked) selectedIds.add(id); else selectedIds.delete(id);
+    updateEmailBtnState();
+  });
+
+  document.getElementById("select-all").addEventListener("change", (ev) => {
+    const checked = ev.target.checked;
+    filtered().forEach((u) => { if (checked) selectedIds.add(u.id); else selectedIds.delete(u.id); });
+    render();
+  });
 
   // Bước xác nhận: nêu rõ email của tài khoản sắp được cấp/thu quyền admin.
   document.getElementById("rows").addEventListener("click", async (ev) => {
@@ -271,23 +301,28 @@
 
   document.getElementById("play-store-email-btn").addEventListener("click", async (ev) => {
     const btn = ev.target;
-    if (!confirm(t("admin.users.confirmPlayStoreEmail", { count: allUsers.length }))) return;
+    if (selectedIds.size === 0) return;
+    if (!confirm(t("admin.users.confirmPlayStoreEmail", { count: selectedIds.size }))) return;
     btn.disabled = true;
     const originalText = btn.textContent;
     btn.textContent = t("admin.users.sendingEmail");
     try {
       const res = await fetch("/api/admin/users/play-store-email", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        body: JSON.stringify({ user_ids: Array.from(selectedIds) }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : t("admin.users.actionError"));
       alert(t("admin.users.playStoreEmailResult", { sent: data.sent, failed: data.failed }));
+      selectedIds.clear();
+      render();
     } catch (err) {
       alert(err.message || t("admin.users.actionError"));
     } finally {
-      btn.disabled = false;
       btn.textContent = originalText;
+      updateEmailBtnState();
     }
   });
 

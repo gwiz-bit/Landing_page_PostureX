@@ -222,13 +222,15 @@ async def admin_set_user_admin(access_token: str, user_id: int, is_admin: bool) 
         return resp.json()
 
 
-async def admin_send_play_store_email(access_token: str) -> dict:
+async def admin_send_play_store_email(access_token: str, user_ids: list[int]) -> dict:
     """Proxy POST /admin/notifications/play-store-email — gửi SMTP thật cho
-    mọi user active nên timeout dài hơn các proxy khác (gửi tuần tự từng
-    người, có thể mất vài chục giây nếu nhiều user)."""
+    đúng danh sách `user_ids` được chọn trên giao diện. Timeout dài hơn các
+    proxy khác (gửi tuần tự từng người, có thể mất vài chục giây nếu chọn
+    nhiều user)."""
     async with httpx.AsyncClient(base_url=settings.POSTUREX_API_BASE_URL, timeout=120.0) as client:
         resp = await client.post(
             "/admin/notifications/play-store-email",
+            json={"user_ids": user_ids},
             headers={"Authorization": f"Bearer {access_token}"},
         )
         if resp.status_code != 200:

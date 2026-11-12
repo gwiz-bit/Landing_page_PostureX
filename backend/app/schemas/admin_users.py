@@ -24,6 +24,10 @@ class AdminRoleIn(BaseModel):
     is_admin: bool
 
 
+class EmailAnnouncementIn(BaseModel):
+    user_ids: list[int]
+
+
 class EmailAnnouncementOut(BaseModel):
     sent: int
     failed: int
